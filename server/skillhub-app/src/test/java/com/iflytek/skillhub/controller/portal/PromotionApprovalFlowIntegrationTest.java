@@ -29,9 +29,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -85,19 +85,19 @@ class PromotionApprovalFlowIntegrationTest {
     @Autowired
     private PromotionRequestJpaRepository promotionRequestRepository;
 
-    @MockBean
+    @MockitoBean
     private DeviceAuthService deviceAuthService;
 
-    @MockBean
+    @MockitoBean
     private RbacService rbacService;
 
-    @MockBean
+    @MockitoBean
     private GovernanceNotificationService governanceNotificationService;
 
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
 
-    @MockBean
+    @MockitoBean
     private AuditLogRepository auditLogRepository;
 
     @BeforeEach

@@ -30,9 +30,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -76,7 +76,7 @@ class AccountMergeFlowIntegrationTest {
     @Autowired private ApiTokenService apiTokenService;
     @Autowired private JdbcTemplate jdbcTemplate;
     @Autowired private PlatformTransactionManager transactionManager;
-    @MockBean private NamespaceMemberRepository namespaceMemberRepository;
+    @MockitoBean private NamespaceMemberRepository namespaceMemberRepository;
 
     @Test
     void secondaryAccountMustApproveBeforeInitiatorCanMerge() throws Exception {

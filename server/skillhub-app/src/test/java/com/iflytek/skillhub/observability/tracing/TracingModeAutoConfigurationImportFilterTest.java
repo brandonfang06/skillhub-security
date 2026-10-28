@@ -10,13 +10,13 @@ import static org.mockito.Mockito.mock;
 class TracingModeAutoConfigurationImportFilterTest {
 
     private static final String CORE_OTEL_AUTO_CONFIGURATION =
-            "org.springframework.boot.actuate.autoconfigure.opentelemetry.OpenTelemetryAutoConfiguration";
+            "org.springframework.boot.opentelemetry.autoconfigure.OpenTelemetrySdkAutoConfiguration";
     private static final String TRACING_OTEL_AUTO_CONFIGURATION =
-            "org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration";
+            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryTracingAutoConfiguration";
     private static final String OTLP_AUTO_CONFIGURATION =
-            "org.springframework.boot.actuate.autoconfigure.tracing.otlp.OtlpAutoConfiguration";
+            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.otlp.OtlpTracingAutoConfiguration";
     private static final String NOOP_AUTO_CONFIGURATION =
-            "org.springframework.boot.actuate.autoconfigure.tracing.NoopTracerAutoConfiguration";
+            "org.springframework.boot.micrometer.tracing.autoconfigure.NoopTracerAutoConfiguration";
 
     private final TracingModeAutoConfigurationImportFilter filter =
             new TracingModeAutoConfigurationImportFilter();
@@ -57,7 +57,7 @@ class TracingModeAutoConfigurationImportFilterTest {
                         TracingModeAutoConfigurationImportFilter.TRACING_MODE_PROPERTY,
                         "otel-sdk"
                 )
-                .withProperty("management.otlp.tracing.endpoint", "http://127.0.0.1:4318/v1/traces"));
+                .withProperty("management.opentelemetry.tracing.export.otlp.endpoint", "http://127.0.0.1:4318/v1/traces"));
 
         assertThat(matches()).containsExactly(true, true, true, true, false);
     }
@@ -69,7 +69,7 @@ class TracingModeAutoConfigurationImportFilterTest {
                         TracingModeAutoConfigurationImportFilter.TRACING_MODE_PROPERTY,
                         "otel-sdk"
                 )
-                .withProperty("management.otlp.tracing.endpoint", ""));
+                .withProperty("management.opentelemetry.tracing.export.otlp.endpoint", ""));
 
         assertThat(matches()).containsExactly(true, true, false, true, false);
     }

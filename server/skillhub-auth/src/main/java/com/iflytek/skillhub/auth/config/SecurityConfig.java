@@ -37,7 +37,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
@@ -164,7 +164,7 @@ public class SecurityConfig {
                 .accessDeniedHandler(apiAccessDeniedHandler)
                 .defaultAuthenticationEntryPointFor(
                     apiAuthenticationEntryPoint,
-                    new AntPathRequestMatcher("/api/**")
+                    PathPatternRequestMatcher.withDefaults().matcher("/api/**")
                 )
             )
             .logout(logout -> logout

@@ -9,7 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,10 +28,10 @@ class PrometheusEndpointTest {
     @Autowired
     private Environment environment;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private DeviceAuthService deviceAuthService;
 
     @Test

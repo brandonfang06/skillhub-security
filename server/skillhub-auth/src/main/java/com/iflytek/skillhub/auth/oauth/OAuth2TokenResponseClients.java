@@ -10,10 +10,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 /**
  * Factory for the standard OAuth2 authorization-code token client used by public providers.
@@ -32,10 +33,10 @@ final class OAuth2TokenResponseClients {
     private OAuth2TokenResponseClients() {
     }
 
-    static DefaultAuthorizationCodeTokenResponseClient standard() {
-        DefaultAuthorizationCodeTokenResponseClient client =
-                new DefaultAuthorizationCodeTokenResponseClient();
-        client.setRestOperations(standardRestTemplate());
+    static RestClientAuthorizationCodeTokenResponseClient standard() {
+        RestClientAuthorizationCodeTokenResponseClient client =
+                new RestClientAuthorizationCodeTokenResponseClient();
+        client.setRestClient(RestClient.create(standardRestTemplate()));
         return client;
     }
 

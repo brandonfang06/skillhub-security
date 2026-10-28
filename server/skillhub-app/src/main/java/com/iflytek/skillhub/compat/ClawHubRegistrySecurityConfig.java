@@ -10,7 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
@@ -27,8 +27,8 @@ public class ClawHubRegistrySecurityConfig {
         http
                 .securityMatcher(
                         new OrRequestMatcher(
-                                new AntPathRequestMatcher("/api/v1/labels", HttpMethod.GET.name()),
-                                new AntPathRequestMatcher("/api/web/labels", HttpMethod.GET.name())
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/v1/labels"),
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/web/labels")
                         )
                 )
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
@@ -47,12 +47,12 @@ public class ClawHubRegistrySecurityConfig {
         http
                 .securityMatcher(new AndRequestMatcher(
                         new OrRequestMatcher(
-                                new AntPathRequestMatcher("/api/v1/search"),
-                                new AntPathRequestMatcher("/api/v1/download"),
-                                new AntPathRequestMatcher("/api/v1/skills/*")),
+                                PathPatternRequestMatcher.withDefaults().matcher("/api/v1/search"),
+                                PathPatternRequestMatcher.withDefaults().matcher("/api/v1/download"),
+                                PathPatternRequestMatcher.withDefaults().matcher("/api/v1/skills/*")),
                         new NegatedRequestMatcher(new OrRequestMatcher(
-                                new AntPathRequestMatcher("/api/v1/skills/package-preview", HttpMethod.POST.name()),
-                                new AntPathRequestMatcher("/api/v1/skills/avatar-uploads", HttpMethod.POST.name())))
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/skills/package-preview"),
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/skills/avatar-uploads")))
                 ))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .requestCache(cache -> cache.disable())

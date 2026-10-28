@@ -1,3 +1,6 @@
+> Security reference repository: use `dev` for the Java/React version with verified
+> Critical CVE fixes. See the [verification report and remaining findings](docs/security-remediation-2026-10-28.md).
+
 <div align="center">
   <img src="./skillhub-logo.svg" alt="SkillHub Logo" width="120" height="120" />
   <h1>SkillHub</h1>

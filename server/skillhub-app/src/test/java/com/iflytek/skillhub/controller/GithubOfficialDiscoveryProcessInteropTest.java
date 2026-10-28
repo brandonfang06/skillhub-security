@@ -5,7 +5,7 @@ import com.iflytek.skillhub.githubsync.GithubOfficialDiscoveryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -49,8 +49,8 @@ class GithubOfficialDiscoveryProcessInteropTest {
     @TestConfiguration
     static class RedisFixtureConfig {
         @Bean
-        RedisProperties redisProperties() {
-            RedisProperties properties = new RedisProperties();
+        DataRedisProperties redisProperties() {
+            DataRedisProperties properties = new DataRedisProperties();
             properties.setHost(REDIS.getHost());
             properties.setPort(REDIS.getMappedPort(6379));
             return properties;

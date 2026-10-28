@@ -35,10 +35,10 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,11 +63,11 @@ class SkillReviewModerationFlowIntegrationTest {
     @Autowired private JpaSkillRatingRepository ratingJpaRepository;
 
     @Autowired private AuditLogRepository auditLogRepository;
-    @SpyBean private AuditLogJpaRepository auditLogJpaRepository;
-    @MockBean private DeviceAuthService deviceAuthService;
-    @MockBean private RbacService rbacService;
-    @MockBean private GovernanceNotificationService governanceNotificationService;
-    @MockBean private NotificationService notificationService;
+    @MockitoSpyBean private AuditLogJpaRepository auditLogJpaRepository;
+    @MockitoBean private DeviceAuthService deviceAuthService;
+    @MockitoBean private RbacService rbacService;
+    @MockitoBean private GovernanceNotificationService governanceNotificationService;
+    @MockitoBean private NotificationService notificationService;
 
     @Test
     void hideAndRestorePersistModerationStateAndAuditRows() throws Exception {

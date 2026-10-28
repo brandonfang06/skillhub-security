@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,25 +45,25 @@ class LocalAuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private LocalAuthService localAuthService;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillHubMetrics skillHubMetrics;
 
-    @MockBean
+    @MockitoBean
     private AuthFailureThrottleService authFailureThrottleService;
 
-    @MockBean
+    @MockitoBean
     private PasswordResetService passwordResetService;
 
-    @MockBean
+    @MockitoBean
     private LocalCredentialRepository localCredentialRepository;
 
-    @MockBean
+    @MockitoBean
     private LocalAuthSettingsService localAuthSettingsService;
 
     @org.junit.jupiter.api.BeforeEach

@@ -239,7 +239,8 @@ class GlobalExceptionHandlerTest {
 
         List<Exception> exceptions = List.of(
                 new MissingServletRequestParameterException("namespace", "String"),
-                new HttpMessageNotReadableException("Malformed request body"),
+                new HttpMessageNotReadableException("Malformed request body",
+                        new org.springframework.mock.http.MockHttpInputMessage(new byte[0])),
                 new MethodArgumentTypeMismatchException(
                         "bad-value", Long.class, "id", null, new NumberFormatException("bad-value"))
         );

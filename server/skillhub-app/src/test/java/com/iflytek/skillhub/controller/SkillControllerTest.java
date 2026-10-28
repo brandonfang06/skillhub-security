@@ -15,9 +15,9 @@ import com.iflytek.skillhub.service.SkillLabelAppService;
 import com.iflytek.skillhub.service.SkillSuiteAppService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,22 +52,22 @@ class SkillControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillQueryService skillQueryService;
 
-    @MockBean
+    @MockitoBean
     private SkillDownloadService skillDownloadService;
 
-    @MockBean
+    @MockitoBean
     private SkillLabelAppService skillLabelAppService;
 
-    @MockBean
+    @MockitoBean
     private SkillSuiteAppService skillSuiteAppService;
 
-    @MockBean
+    @MockitoBean
     private GithubSkillSourceQueryRepository githubSkillSourceQueryRepository;
 
     @Test

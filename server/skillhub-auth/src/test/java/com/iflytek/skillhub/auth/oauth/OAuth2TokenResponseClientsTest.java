@@ -7,7 +7,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 class OAuth2TokenResponseClientsTest {
 
@@ -36,9 +37,9 @@ class OAuth2TokenResponseClientsTest {
                         """,
                         MediaType.APPLICATION_JSON
                 ));
-        DefaultAuthorizationCodeTokenResponseClient client =
-                new DefaultAuthorizationCodeTokenResponseClient();
-        client.setRestOperations(restTemplate);
+        RestClientAuthorizationCodeTokenResponseClient client =
+                new RestClientAuthorizationCodeTokenResponseClient();
+        client.setRestClient(RestClient.create(restTemplate));
 
         var response = client.getTokenResponse(grantRequest("github"));
 
@@ -57,9 +58,9 @@ class OAuth2TokenResponseClientsTest {
                         "{\"access_token\":\"" + sensitivePadding + "\",\"token_type\":\"Bearer\",\"expires_in\":3600}",
                         MediaType.APPLICATION_JSON
                 ));
-        DefaultAuthorizationCodeTokenResponseClient client =
-                new DefaultAuthorizationCodeTokenResponseClient();
-        client.setRestOperations(restTemplate);
+        RestClientAuthorizationCodeTokenResponseClient client =
+                new RestClientAuthorizationCodeTokenResponseClient();
+        client.setRestClient(RestClient.create(restTemplate));
 
         assertThatThrownBy(() -> client.getTokenResponse(grantRequest("gitlab")))
                 .satisfies(error -> assertThat(error.getMessage())

@@ -18,12 +18,12 @@ public final class TracingModeAutoConfigurationImportFilter
     static final String TRACING_MODE_PROPERTY = "skillhub.observability.tracing-mode";
 
     private static final Set<String> OTEL_AUTO_CONFIGURATIONS = Set.of(
-            "org.springframework.boot.actuate.autoconfigure.opentelemetry.OpenTelemetryAutoConfiguration",
-            "org.springframework.boot.actuate.autoconfigure.tracing.OpenTelemetryAutoConfiguration"
+            "org.springframework.boot.opentelemetry.autoconfigure.OpenTelemetrySdkAutoConfiguration",
+            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryTracingAutoConfiguration"
     );
 
     private static final Set<String> OTLP_EXPORT_AUTO_CONFIGURATIONS = Set.of(
-            "org.springframework.boot.actuate.autoconfigure.tracing.otlp.OtlpAutoConfiguration"
+            "org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.otlp.OtlpTracingAutoConfiguration"
     );
 
     private Environment environment;
@@ -38,7 +38,7 @@ public final class TracingModeAutoConfigurationImportFilter
                         environment.getProperty(TRACING_MODE_PROPERTY, "none")
                 );
         boolean otlpExportEnabled = otelSdkEnabled
-                && hasText(environment.getProperty("management.otlp.tracing.endpoint"));
+                && hasText(environment.getProperty("management.opentelemetry.tracing.export.otlp.endpoint"));
         boolean[] matches = new boolean[autoConfigurationClasses.length];
         for (int index = 0; index < autoConfigurationClasses.length; index++) {
             String autoConfigurationClass = autoConfigurationClasses[index];

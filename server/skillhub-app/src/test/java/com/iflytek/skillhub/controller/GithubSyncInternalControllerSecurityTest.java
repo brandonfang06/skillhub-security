@@ -4,9 +4,9 @@ import com.iflytek.skillhub.githubsync.GithubSyncLeaseService;
 import com.iflytek.skillhub.service.GithubCredentialLeaseAppService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -33,8 +33,8 @@ class GithubSyncInternalControllerSecurityTest {
             """;
 
     @Autowired private MockMvc mockMvc;
-    @MockBean private GithubCredentialLeaseAppService credentialLeases;
-    @MockBean private GithubSyncLeaseService leases;
+    @MockitoBean private GithubCredentialLeaseAppService credentialLeases;
+    @MockitoBean private GithubSyncLeaseService leases;
 
     @Test
     void anonymousAndWrongServiceTokensCannotClaim() throws Exception {

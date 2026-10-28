@@ -2,7 +2,7 @@ package com.iflytek.skillhub.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RedisConnectionConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(RedisAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(DataRedisAutoConfiguration.class));
 
     @Test
     void autoConfiguration_keepsStandaloneAsTheDefault() {

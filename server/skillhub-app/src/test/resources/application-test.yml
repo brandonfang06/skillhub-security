@@ -21,9 +21,10 @@ spring:
       port: 6379
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.session.autoconfigure.SessionAutoConfiguration
+      - org.springframework.boot.session.data.redis.autoconfigure.SessionDataRedisAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration
   security:
     oauth2:
       client:

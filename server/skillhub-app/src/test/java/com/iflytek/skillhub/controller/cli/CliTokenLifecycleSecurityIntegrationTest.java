@@ -24,9 +24,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -90,7 +90,7 @@ class CliTokenLifecycleSecurityIntegrationTest {
     @Autowired ApiTokenRepository apiTokenRepository;
     @Autowired UserAccountRepository userAccountRepository;
     @Autowired Clock clock;
-    @MockBean CliSkillAppService cliSkillAppService;
+    @MockitoBean CliSkillAppService cliSkillAppService;
 
     private String userId;
     private String sessionUserId;

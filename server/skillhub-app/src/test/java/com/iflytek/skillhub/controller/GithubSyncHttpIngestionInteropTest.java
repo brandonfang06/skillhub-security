@@ -46,8 +46,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -164,8 +164,8 @@ class GithubSyncHttpIngestionInteropTest {
     @TestConfiguration
     static class RedisFixtureConfig {
         @Bean
-        RedisProperties redisProperties() {
-            RedisProperties properties = new RedisProperties();
+        DataRedisProperties redisProperties() {
+            DataRedisProperties properties = new DataRedisProperties();
             properties.setHost(REDIS.getHost());
             properties.setPort(REDIS.getMappedPort(6379));
             return properties;

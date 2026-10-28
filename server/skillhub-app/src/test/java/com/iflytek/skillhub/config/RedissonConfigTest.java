@@ -5,7 +5,7 @@ import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -17,7 +17,7 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_buildsRedisAddressFromHostPortAndSslFlag() {
-        RedisProperties properties = new RedisProperties();
+        DataRedisProperties properties = new DataRedisProperties();
         properties.setHost("redis.internal");
         properties.setPort(6380);
         properties.getSsl().setEnabled(true);
@@ -30,7 +30,7 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_prefersExplicitRedisUrlWhenPresent() {
-        RedisProperties properties = new RedisProperties();
+        DataRedisProperties properties = new DataRedisProperties();
         properties.setUrl("redis://cache.example:6379");
         properties.setHost("ignored-host");
         properties.setPort(6380);
@@ -43,7 +43,7 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_appliesDatabaseCredentialsClientNameAndTimeouts() {
-        RedisProperties properties = new RedisProperties();
+        DataRedisProperties properties = new DataRedisProperties();
         properties.setHost("localhost");
         properties.setPort(6379);
         properties.setDatabase(5);
@@ -66,8 +66,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_usesSentinelServersWhenSentinelPropertiesArePresent() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379", "redis-sentinel-2:26379"));
         properties.setSentinel(sentinel);
@@ -93,8 +93,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_usesSecureSchemeForSentinelAddressesWhenSslEnabled() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         properties.setSentinel(sentinel);
@@ -108,8 +108,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_appliesSentinelPasswordWhenSet() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         sentinel.setPassword("sentinel-secret");
@@ -125,8 +125,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_appliesSentinelUsernameWhenSet() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         sentinel.setUsername("sentinel-user");
@@ -140,8 +140,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_usesClusterServersWhenClusterNodesArePresent() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Cluster cluster = new RedisProperties.Cluster();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Cluster cluster = new DataRedisProperties.Cluster();
         cluster.setNodes(List.of("redis-cluster-1:6379", " redis-cluster-2:6380 "));
         properties.setCluster(cluster);
         properties.setUsername("skillhub");
@@ -165,8 +165,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_usesSecureSchemeForClusterAddressesWhenSslEnabled() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Cluster cluster = new RedisProperties.Cluster();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Cluster cluster = new DataRedisProperties.Cluster();
         cluster.setNodes(List.of("redis-cluster-1:6379"));
         properties.setCluster(cluster);
         properties.getSsl().setEnabled(true);
@@ -179,12 +179,12 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_prefersSentinelWhenSentinelAndClusterAreBothConfigured() {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         properties.setSentinel(sentinel);
-        RedisProperties.Cluster cluster = new RedisProperties.Cluster();
+        DataRedisProperties.Cluster cluster = new DataRedisProperties.Cluster();
         cluster.setNodes(List.of("redis-cluster-1:6379"));
         properties.setCluster(cluster);
 
@@ -196,8 +196,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_keepsSentinelMembershipCheckEnabledByDefault() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         properties.setSentinel(sentinel);
@@ -210,8 +210,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_canDisableSentinelMembershipCheckForKubernetes() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         properties.setSentinel(sentinel);
@@ -224,8 +224,8 @@ class RedissonConfigTest {
 
     @Test
     void createConfig_doesNotSetSentinelPasswordWhenEmpty() throws Exception {
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Sentinel sentinel = new RedisProperties.Sentinel();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Sentinel sentinel = new DataRedisProperties.Sentinel();
         sentinel.setMaster("mymaster");
         sentinel.setNodes(List.of("redis-sentinel-1:26379"));
         properties.setSentinel(sentinel);

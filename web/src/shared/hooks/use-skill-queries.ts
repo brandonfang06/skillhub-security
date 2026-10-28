@@ -4,6 +4,7 @@ import { fetchJson, fetchText, getCsrfHeaders, skillLifecycleApi, WEB_API_PREFIX
 import { clearDeletedSkillQueries } from '@/features/skill/skill-delete-flow'
 import { getSkillDetailQueryKey } from './query-keys'
 import { buildSkillSearchUrl } from './skill-query-helpers'
+import type { components } from '@/api/generated/schema'
 
 const PUBLISH_REQUEST_TIMEOUT_MS = 60_000
 const SCAN_POLL_INTERVAL_MS = 5_000
@@ -64,7 +65,7 @@ async function publishSkill(params: { namespace: string; file: File; visibility:
   })
 }
 
-export async function previewSkillPackage(file: File): Promise<import('@/api/generated/schema').components['schemas']['SkillPackagePreviewResponse']> {
+export async function previewSkillPackage(file: File): Promise<components['schemas']['SkillPackagePreviewResponse']> {
   const body = new FormData()
   body.append('file', file)
   return fetchJson(`${WEB_API_PREFIX}/skills/package-preview`, {

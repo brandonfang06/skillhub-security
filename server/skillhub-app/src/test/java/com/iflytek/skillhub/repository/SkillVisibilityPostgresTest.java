@@ -19,10 +19,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -57,9 +57,9 @@ class SkillVisibilityPostgresTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
     @TestConfiguration static class Configuration { @Bean Clock clock() { return Clock.systemUTC(); } @Bean com.fasterxml.jackson.databind.ObjectMapper mapper() { return new com.fasterxml.jackson.databind.ObjectMapper(); } }
-    @MockBean SecurityScanService scanner;
-    @MockBean com.iflytek.skillhub.domain.governance.GovernanceNotificationService notifications;
-    @org.springframework.boot.test.mock.mockito.SpyBean JpaSkillRepositoryAdapter skillAdapter;
+    @MockitoBean SecurityScanService scanner;
+    @MockitoBean com.iflytek.skillhub.domain.governance.GovernanceNotificationService notifications;
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean JpaSkillRepositoryAdapter skillAdapter;
     @Autowired PromotionService promotions;
     @Autowired PromotionRequestJpaRepository promotionRows;
     @jakarta.persistence.PersistenceContext jakarta.persistence.EntityManager entityManager;

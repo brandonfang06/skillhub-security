@@ -22,9 +22,9 @@ import com.iflytek.skillhub.domain.skill.service.SkillSlugResolutionService;
 import com.iflytek.skillhub.domain.namespace.NamespaceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -40,22 +40,22 @@ class SkillReportControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private NamespaceRepository namespaceRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillRepository skillRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillReportService skillReportService;
 
-    @MockBean
+    @MockitoBean
     private SkillSlugResolutionService skillSlugResolutionService;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private DeviceAuthService deviceAuthService;
 
     @Test

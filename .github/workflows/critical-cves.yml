@@ -1,0 +1,80 @@
+name: Code and dependency security
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Java and frontend Semgrep
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Scan production Java and JS/TS with public security rules
+        run: |
+          docker run --name semgrep-source -v "$GITHUB_WORKSPACE:/src:ro" -w /src \
+            semgrep/semgrep@sha256:3db5c7af55eb1f512eac0abf0ab69a97b52c74b5e9a27314c221aee1a78d7ab2 \
+            sh -c 'semgrep scan --oss-only --error --severity ERROR --config p/java --config p/javascript --config p/typescript --config p/security-audit --exclude "*.test.ts" --exclude "*.test.tsx" --metrics=off --json --output /tmp/semgrep.json server/*/src/main/java web/src'
+      - name: Collect report
+        if: always()
+        run: docker cp semgrep-source:/tmp/semgrep.json semgrep.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-source
+          path: semgrep.json
+          if-no-files-found: error
+
+  dependencies:
+    name: Critical Java and frontend dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build actual Java artifact
+        working-directory: server
+        run: ./mvnw -B -DskipTests package
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567
+        with:
+          version: v0.76.1
+          cache: true
+      - name: Fail on Critical Java runtime CVEs
+        run: >-
+          trivy rootfs --scanners vuln --severity CRITICAL --exit-code 1
+          --format json --output java-critical.json server/skillhub-app/target
+      - name: Fail on Critical frontend dependency CVEs
+        run: >-
+          trivy fs --scanners vuln --include-dev-deps --severity CRITICAL --exit-code 1
+          --format json --output frontend-critical.json web
+      - name: Require actual Java package coverage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          results = json.loads(Path('java-critical.json').read_text())['Results']
+          assert any(result.get('Type') == 'jar' and result.get('Packages') for result in results), 'No JAR packages scanned'
+          results = json.loads(Path('frontend-critical.json').read_text())['Results']
+          assert any(result.get('Type') == 'pnpm' and result.get('Packages') for result in results), 'No frontend packages scanned'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: critical-dependency-reports
+          path: '*critical.json'
+          if-no-files-found: error

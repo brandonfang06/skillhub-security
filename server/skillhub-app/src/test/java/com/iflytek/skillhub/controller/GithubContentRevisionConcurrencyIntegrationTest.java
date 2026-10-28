@@ -43,11 +43,11 @@ class GithubContentRevisionConcurrencyIntegrationTest {
         registry.add("spring.flyway.enabled", () -> true);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     org.redisson.api.RedissonClient redissonClient;
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     com.iflytek.skillhub.stream.ScanTaskConsumer scanTaskConsumer;
     @Autowired JdbcTemplate jdbc;
     @Autowired GithubSyncIngestionRepository ingestions;

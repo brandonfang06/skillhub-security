@@ -1,9 +1,10 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.13-slim-trixie@sha256:2d44738ebf4ce5f63b9d9ea871e9c7cfdc0426f7b0c97cac915fd88ded1d86bb
 
 WORKDIR /app
 
+COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --only-binary=:all: \
-        "cisco-ai-skill-scanner==2.1.0" && \
+        -r /app/requirements.txt && \
     groupadd --system app && \
     useradd --system --gid app --home-dir /nonexistent --no-create-home app && \
     install -d -o app -g app /tmp/skillhub-scans

@@ -37,12 +37,12 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -83,7 +83,7 @@ class SkillSuiteHardDeleteIntegrationTest {
     }
 
     @Autowired private TestEntityManager entityManager;
-    @SpyBean private SkillSuiteRepository suiteRepository;
+    @MockitoSpyBean private SkillSuiteRepository suiteRepository;
     @Autowired private SkillSuiteVersionRepository suiteVersionRepository;
     @Autowired private SkillSuiteVersionMemberRepository suiteMemberRepository;
     @Autowired private ReviewTaskRepository reviewTaskRepository;
@@ -92,8 +92,8 @@ class SkillSuiteHardDeleteIntegrationTest {
     @Autowired private TransactionTemplate transactionTemplate;
     @Autowired private SkillSuiteLifecycleService service;
 
-    @MockBean private SkillSuitePublicationValidator publicationValidator;
-    @SpyBean private AuditLogService auditLogService;
+    @MockitoBean private SkillSuitePublicationValidator publicationValidator;
+    @MockitoSpyBean private AuditLogService auditLogService;
 
     private void persistUsers(String ownerId, String authorId) {
         entityManager.persist(new UserAccount(ownerId, "Owner", null, null));

@@ -32,9 +32,9 @@ import com.iflytek.skillhub.domain.skill.service.SkillPublishService;
 import com.iflytek.skillhub.domain.skill.service.SkillGovernanceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -49,34 +49,34 @@ class SkillLifecycleControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private NamespaceRepository namespaceRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillRepository skillRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillVersionRepository skillVersionRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillGovernanceService skillGovernanceService;
 
-    @MockBean
+    @MockitoBean
     private ReviewService reviewService;
 
-    @MockBean
+    @MockitoBean
     private SkillPublishService skillPublishService;
 
-    @MockBean
+    @MockitoBean
     private SkillSlugResolutionService skillSlugResolutionService;
 
-    @MockBean
+    @MockitoBean
     private AuditLogService auditLogService;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private DeviceAuthService deviceAuthService;
 
     @Test

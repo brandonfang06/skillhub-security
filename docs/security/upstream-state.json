@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "upstream": "iflytek/skillhub",
+  "destination": "brandonfang06/skillhub-security",
+  "branch": "dev",
+  "upstreamBaseCommit": "9ebb99226dd1b3e1d4fd8dd3e36baae70a4ed273",
+  "coveredReleases": [
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.24",
+      "prerelease": false,
+      "published_at": "2026-10-26T01:43:29Z",
+      "tag_name": "v0.2.24",
+      "commit": "7d632d632594bbd7c7db3701f9bf7d716269ba9c"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/dsh-v0.4.0",
+      "prerelease": false,
+      "published_at": "2026-10-26T06:30:10Z",
+      "tag_name": "dsh-v0.4.0",
+      "commit": "c4e654cf67bfeee52e968ee0fe4bc12944ffc960"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.2.0",
+      "prerelease": false,
+      "published_at": "2026-10-26T06:05:11Z",
+      "tag_name": "cli-v0.2.0",
+      "commit": "c4e654cf67bfeee52e968ee0fe4bc12944ffc960"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.23",
+      "prerelease": false,
+      "published_at": "2026-10-19T08:30:08Z",
+      "tag_name": "v0.2.23",
+      "commit": "2fe1a44059f51c1fa2e72ea3f1f3d59942e1e8be"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.22",
+      "prerelease": false,
+      "published_at": "2026-10-10T10:44:00Z",
+      "tag_name": "v0.2.22",
+      "commit": "72429e6f69ac5d04e8314b1eed2f8c055809c9f5"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.21",
+      "prerelease": false,
+      "published_at": "2026-09-19T12:20:31Z",
+      "tag_name": "v0.2.21",
+      "commit": "be46c547d1a81b90bd3a0d0e8456d716ebfb5880"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.20",
+      "prerelease": false,
+      "published_at": "2026-09-13T09:27:27Z",
+      "tag_name": "v0.2.20",
+      "commit": "36de54157bff59c18c5eff255d2c158df45a3e2a"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.1.12",
+      "prerelease": false,
+      "published_at": "2026-09-09T09:50:14Z",
+      "tag_name": "cli-v0.1.12",
+      "commit": "3fd8c63fe5fc2c2807c6fbfbcde7ebd76dea94de"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.19",
+      "prerelease": false,
+      "published_at": "2026-09-04T11:11:26Z",
+      "tag_name": "v0.2.19",
+      "commit": "64e1fecbe71e7d9e7f9d0d4bd45a117e4e1ee499"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.1.11",
+      "prerelease": false,
+      "published_at": "2026-09-04T10:09:01Z",
+      "tag_name": "cli-v0.1.11",
+      "commit": "64e1fecbe71e7d9e7f9d0d4bd45a117e4e1ee499"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.1.10",
+      "prerelease": false,
+      "published_at": "2026-09-03T08:32:40Z",
+      "tag_name": "cli-v0.1.10",
+      "commit": "d6afc43364444677466407ac6168f6e9705eab09"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.18",
+      "prerelease": false,
+      "published_at": "2026-08-29T10:02:07Z",
+      "tag_name": "v0.2.18",
+      "commit": "b896c698cde8e50e58023bb80eb1004bcf67fdd5"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.17",
+      "prerelease": false,
+      "published_at": "2026-08-21T10:13:00Z",
+      "tag_name": "v0.2.17",
+      "commit": "15ce199e1a951fed05139e4c984150ddfc45def3"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.16",
+      "prerelease": false,
+      "published_at": "2026-08-07T05:48:43Z",
+      "tag_name": "v0.2.16",
+      "commit": "6e133c006e492dc3f468d91b21960aff1d577150"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.15",
+      "prerelease": false,
+      "published_at": "2026-07-30T08:25:54Z",
+      "tag_name": "v0.2.15",
+      "commit": "6817d98007c7890c1a8ecb3e822272287bb37a05"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.14",
+      "prerelease": false,
+      "published_at": "2026-07-22T09:33:28Z",
+      "tag_name": "v0.2.14",
+      "commit": "982258d032a22ffa0403db445c2736b128ec06b1"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.1.9",
+      "prerelease": false,
+      "published_at": "2026-07-22T09:47:12Z",
+      "tag_name": "cli-v0.1.9",
+      "commit": "ac46ad53913e413e451710a3563590b62d183927"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.13",
+      "prerelease": false,
+      "published_at": "2026-07-03T08:24:54Z",
+      "tag_name": "v0.2.13",
+      "commit": "e32f05b375379d887bd3766b40f993c70d39db54"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.12",
+      "prerelease": false,
+      "published_at": "2026-06-18T07:51:47Z",
+      "tag_name": "v0.2.12",
+      "commit": "f8ea4e67e44b0ba262c926e4149aceb0ad52ef4c"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.1.8",
+      "prerelease": false,
+      "published_at": "2026-06-18T07:58:44Z",
+      "tag_name": "cli-v0.1.8",
+      "commit": "dc185861d4bbc98f1a485e2ddbb5e9199065319f"
+    }
+  ],
+  "securityReport": "docs/security-remediation-2026-10-28.md",
+  "criticalGate": "all three built runtime images, including unfixed Critical findings",
+  "monitor": "SkillHub upstream release watch",
+  "monitorIntervalHours": 48
+}

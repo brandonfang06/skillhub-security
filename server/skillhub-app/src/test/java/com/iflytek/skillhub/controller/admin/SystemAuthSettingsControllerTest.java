@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,8 +36,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 class SystemAuthSettingsControllerTest {
     @Autowired private MockMvc mockMvc;
-    @MockBean private SystemAuthSettingsAppService service;
-    @MockBean private NamespaceMemberRepository namespaceMemberRepository;
+    @MockitoBean private SystemAuthSettingsAppService service;
+    @MockitoBean private NamespaceMemberRepository namespaceMemberRepository;
 
     @Test
     void superAdminCanChangeSettings() throws Exception {

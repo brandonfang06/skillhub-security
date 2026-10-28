@@ -7,6 +7,7 @@ import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryEventPublisherBeansApplicationListener;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,6 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SkillHubTracingConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withInitializer(context -> {
+                var listener = new OpenTelemetryEventPublisherBeansApplicationListener();
+                OpenTelemetryEventPublisherBeansApplicationListener.addWrapper();
+                context.addApplicationListener(listener);
+            })
             .withUserConfiguration(TestApplication.class)
             .withPropertyValues(
                     "spring.flyway.enabled=false",
@@ -68,7 +74,7 @@ class SkillHubTracingConfigurationTest {
         contextRunner
                 .withPropertyValues(
                         "skillhub.observability.tracing-mode=otel-sdk",
-                        "management.otlp.tracing.endpoint=",
+                        "management.opentelemetry.tracing.export.otlp.endpoint=",
                         "management.tracing.sampling.probability=1.0",
                         "management.tracing.baggage.enabled=false",
                         "management.tracing.propagation.type=W3C"
@@ -86,7 +92,7 @@ class SkillHubTracingConfigurationTest {
         contextRunner
                 .withPropertyValues(
                         "skillhub.observability.tracing-mode=otel-sdk",
-                        "management.otlp.tracing.endpoint=http://127.0.0.1:4318/v1/traces"
+                        "management.opentelemetry.tracing.export.otlp.endpoint=http://127.0.0.1:4318/v1/traces"
                 )
                 .run(context -> {
                     assertThat(context).hasNotFailed();
@@ -99,7 +105,7 @@ class SkillHubTracingConfigurationTest {
         contextRunner
                 .withPropertyValues(
                         "skillhub.observability.tracing-mode=none",
-                        "management.otlp.tracing.endpoint=http://127.0.0.1:4318/v1/traces"
+                        "management.opentelemetry.tracing.export.otlp.endpoint=http://127.0.0.1:4318/v1/traces"
                 )
                 .run(context -> assertThat(context).hasFailed());
     }

@@ -19,9 +19,9 @@ import com.iflytek.skillhub.dto.SkillLifecycleMutationResponse;
 import com.iflytek.skillhub.service.SecurityScanRetryAppService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
@@ -53,22 +53,22 @@ class SecurityAuditControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private SecurityAuditRepository securityAuditRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillRepository skillRepository;
 
-    @MockBean
+    @MockitoBean
     private SkillVersionRepository skillVersionRepository;
 
-    @MockBean
+    @MockitoBean
     private ScanTaskProducer scanTaskProducer;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private SecurityScanRetryAppService securityScanRetryAppService;
 
     @Test

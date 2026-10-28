@@ -5,7 +5,7 @@ import com.iflytek.skillhub.service.SkillAvatarAppService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.after;
 class SkillAvatarScopeReviewListenerTest {
     @Autowired private ApplicationEventPublisher events;
     @Autowired private PlatformTransactionManager transactions;
-    @MockBean private SkillAvatarAppService avatars;
+    @MockitoBean private SkillAvatarAppService avatars;
 
     @Test
     void committedPublicationTriggersScopeReview() {

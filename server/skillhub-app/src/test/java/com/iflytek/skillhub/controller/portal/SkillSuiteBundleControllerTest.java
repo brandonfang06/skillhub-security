@@ -19,9 +19,9 @@ import com.iflytek.skillhub.service.bundle.SkillSuiteBundleOperationCommandServi
 import com.iflytek.skillhub.service.bundle.SkillSuiteBundleResponseMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -55,13 +55,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SkillSuiteBundleControllerTest {
 
     @Autowired private MockMvc mockMvc;
-    @MockBean private SkillSuiteBundlePreviewAppService previewService;
-    @MockBean private SkillSuiteBundleConfirmationAppService confirmationService;
-    @MockBean private SkillSuiteBundleOperationQueryService operationQueryService;
-    @MockBean private SkillSuiteBundleOperationCommandService operationCommandService;
-    @MockBean private SkillSuiteBundleResponseMapper responseMapper;
-    @MockBean private NamespaceMemberRepository namespaceMemberRepository;
-    @MockBean private DeviceAuthService deviceAuthService;
+    @MockitoBean private SkillSuiteBundlePreviewAppService previewService;
+    @MockitoBean private SkillSuiteBundleConfirmationAppService confirmationService;
+    @MockitoBean private SkillSuiteBundleOperationQueryService operationQueryService;
+    @MockitoBean private SkillSuiteBundleOperationCommandService operationCommandService;
+    @MockitoBean private SkillSuiteBundleResponseMapper responseMapper;
+    @MockitoBean private NamespaceMemberRepository namespaceMemberRepository;
+    @MockitoBean private DeviceAuthService deviceAuthService;
 
     @Test
     void previewRequiresAuthentication() throws Exception {

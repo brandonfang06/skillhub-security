@@ -1,0 +1,109 @@
+{
+  "linuxMaven": [
+    {
+      "module": "skillhub-app",
+      "tests": 1509,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 28
+    },
+    {
+      "module": "skillhub-auth",
+      "tests": 336,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "skillhub-domain",
+      "tests": 724,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "skillhub-infra",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "skillhub-notification",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "skillhub-search",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "skillhub-storage",
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2
+    }
+  ],
+  "javaFollowup": {
+    "tests": 36,
+    "failures": 0,
+    "errors": 0,
+    "scope": "New parameterized PostgreSQL query tests and affected profile/OpenAPI/service tests"
+  },
+  "frontend": {
+    "tests": 1232,
+    "failures": 0,
+    "followupTests": 6
+  },
+  "http": [
+    {
+      "url": "http://127.0.0.1:61841/",
+      "status": 200,
+      "bytes": 1450
+    },
+    {
+      "url": "http://127.0.0.1:61841/api/v1/health",
+      "status": 200,
+      "bytes": 152
+    },
+    {
+      "url": "http://127.0.0.1:61841/api/v1/search?q=hello",
+      "status": 200,
+      "bytes": 14
+    },
+    {
+      "url": "http://127.0.0.1:61841/api/v1/tokens",
+      "status": 401
+    },
+    {
+      "url": "http://127.0.0.1:61845/skillhub/",
+      "status": 200,
+      "bytes": 1477
+    },
+    {
+      "url": "http://127.0.0.1:61845/skillhub/api/v1/health",
+      "status": 200,
+      "bytes": 152
+    },
+    {
+      "url": "http://127.0.0.1:61845/skillhub/api/v1/search?q=hello",
+      "status": 200,
+      "bytes": 14
+    },
+    {
+      "url": "http://127.0.0.1:61845/skillhub/api/v1/tokens",
+      "status": 401
+    },
+    {
+      "url": "http://127.0.0.1:61842/v3/api-docs",
+      "status": 200,
+      "openapi": "3.0.1"
+    }
+  ]
+}

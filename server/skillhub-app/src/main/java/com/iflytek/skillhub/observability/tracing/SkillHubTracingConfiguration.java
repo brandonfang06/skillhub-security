@@ -23,10 +23,10 @@ public class SkillHubTracingConfiguration {
             Environment environment
     ) {
         TracingMode mode = properties.getTracingMode();
-        String otlpEndpoint = environment.getProperty("management.otlp.tracing.endpoint");
+        String otlpEndpoint = environment.getProperty("management.opentelemetry.tracing.export.otlp.endpoint");
         if (mode != TracingMode.OTEL_SDK && StringUtils.hasText(otlpEndpoint)) {
             throw new IllegalStateException(
-                    "management.otlp.tracing.endpoint requires "
+                    "management.opentelemetry.tracing.export.otlp.endpoint requires "
                             + "skillhub.observability.tracing-mode=otel-sdk"
             );
         }

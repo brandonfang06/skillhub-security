@@ -39,7 +39,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             return;
         }
 
-        ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request);
+        ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 0);
         ContentCachingResponseWrapper cachedResponse = new ContentCachingResponseWrapper(response);
 
         long startTime = System.currentTimeMillis();

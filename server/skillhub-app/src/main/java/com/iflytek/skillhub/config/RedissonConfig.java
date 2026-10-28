@@ -9,7 +9,7 @@ import org.redisson.config.SingleServerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -23,16 +23,16 @@ public class RedissonConfig {
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean(RedissonClient.class)
     public RedissonClient redissonClient(
-            RedisProperties redisProperties,
+            DataRedisProperties redisProperties,
             @Value("${skillhub.redis.sentinel.check-sentinels-list:true}") boolean checkSentinelsList) {
         return Redisson.create(createConfig(redisProperties, checkSentinelsList));
     }
 
-    static Config createConfig(RedisProperties redisProperties) {
+    static Config createConfig(DataRedisProperties redisProperties) {
         return createConfig(redisProperties, true);
     }
 
-    static Config createConfig(RedisProperties redisProperties, boolean checkSentinelsList) {
+    static Config createConfig(DataRedisProperties redisProperties, boolean checkSentinelsList) {
         Config config = new Config();
         if (hasSentinelConfiguration(redisProperties)) {
             configureSentinelServers(config, redisProperties, checkSentinelsList);
@@ -54,7 +54,7 @@ public class RedissonConfig {
 
     private static void configureSentinelServers(
             Config config,
-            RedisProperties redisProperties,
+            DataRedisProperties redisProperties,
             boolean checkSentinelsList) {
         SentinelServersConfig sentinelServersConfig = config.useSentinelServers()
                 .setMasterName(redisProperties.getSentinel().getMaster())
@@ -76,7 +76,7 @@ public class RedissonConfig {
         }
     }
 
-    private static void configureClusterServers(Config config, RedisProperties redisProperties) {
+    private static void configureClusterServers(Config config, DataRedisProperties redisProperties) {
         ClusterServersConfig clusterServersConfig = config.useClusterServers();
         redisProperties.getCluster().getNodes().stream()
                 .map(String::trim)
@@ -87,21 +87,21 @@ public class RedissonConfig {
         applySharedSettings(clusterServersConfig, redisProperties);
     }
 
-    private static boolean hasSentinelConfiguration(RedisProperties redisProperties) {
+    private static boolean hasSentinelConfiguration(DataRedisProperties redisProperties) {
         return redisProperties.getSentinel() != null
                 && StringUtils.hasText(redisProperties.getSentinel().getMaster())
                 && redisProperties.getSentinel().getNodes() != null
                 && !redisProperties.getSentinel().getNodes().isEmpty();
     }
 
-    private static boolean hasClusterConfiguration(RedisProperties redisProperties) {
+    private static boolean hasClusterConfiguration(DataRedisProperties redisProperties) {
         return redisProperties.getCluster() != null
                 && redisProperties.getCluster().getNodes() != null
                 && redisProperties.getCluster().getNodes().stream().anyMatch(StringUtils::hasText);
     }
 
     private static void applySharedSettings(org.redisson.config.BaseConfig<?> serverConfig,
-                                            RedisProperties redisProperties) {
+                                            DataRedisProperties redisProperties) {
         if (StringUtils.hasText(redisProperties.getUsername())) {
             serverConfig.setUsername(redisProperties.getUsername());
         }
@@ -119,14 +119,14 @@ public class RedissonConfig {
         }
     }
 
-    private static String resolveAddress(RedisProperties redisProperties) {
+    private static String resolveAddress(DataRedisProperties redisProperties) {
         if (StringUtils.hasText(redisProperties.getUrl())) {
             return redisProperties.getUrl();
         }
         return withRedisScheme(redisProperties.getHost() + ":" + redisProperties.getPort(), redisProperties);
     }
 
-    private static String withRedisScheme(String address, RedisProperties redisProperties) {
+    private static String withRedisScheme(String address, DataRedisProperties redisProperties) {
         if (address.startsWith("redis://") || address.startsWith("rediss://")) {
             return address;
         }

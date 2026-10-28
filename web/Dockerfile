@@ -1,7 +1,7 @@
 # The frontend output is static and architecture-neutral. Build it on the
 # Buildx host so linux/riscv64 does not depend on a target-architecture Node.js
 # image; only the multi-architecture Nginx runtime is target-specific.
-FROM --platform=$BUILDPLATFORM node:22-alpine AS build
+FROM --platform=$BUILDPLATFORM node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 AS build
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
@@ -12,7 +12,7 @@ ARG VITE_BASE_PATH=/__SKILLHUB_WEB_BASE_PATH__/
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
 RUN pnpm build
 
-FROM nginx:alpine
+FROM nginx:alpine@sha256:a3554c0d0b48177b1413c26e01f695334428020d9df01243fbae3e11cfd17417
 ENV SKILLHUB_TRUST_FORWARDED_PROTO=false
 ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
 # Record a fixed build-time base so the entrypoint defaults SKILLHUB_WEB_BASE_PATH

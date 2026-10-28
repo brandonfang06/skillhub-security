@@ -27,8 +27,13 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
-  jackson:
+  jackson2:
     time-zone: UTC
+  http:
+    converters:
+      preferred-json-mapper: jackson2
+    codecs:
+      preferred-json-mapper: jackson2
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -323,6 +328,10 @@ skillhub:
       display-name: ${BOOTSTRAP_ADMIN_DISPLAY_NAME:Admin}
       email: ${BOOTSTRAP_ADMIN_EMAIL:admin@skillhub.local}
 
+springdoc:
+  api-docs:
+    version: OPENAPI_3_0
+
 management:
   tracing:
     sampling:
@@ -331,10 +340,12 @@ management:
       enabled: false
     propagation:
       type: W3C
-  otlp:
+  opentelemetry:
     tracing:
-      timeout: ${SKILLHUB_OTLP_TIMEOUT:5s}
-      compression: ${SKILLHUB_OTLP_COMPRESSION:gzip}
+      export:
+        otlp:
+          timeout: ${SKILLHUB_OTLP_TIMEOUT:5s}
+          compression: ${SKILLHUB_OTLP_COMPRESSION:gzip}
   health:
     mail:
       enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:false}

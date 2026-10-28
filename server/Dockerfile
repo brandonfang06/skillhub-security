@@ -1,6 +1,6 @@
 # Build the architecture-neutral JAR on the Buildx host. This avoids emulating
 # the complete Maven build when the target image is linux/riscv64.
-FROM --platform=$BUILDPLATFORM eclipse-temurin:21-jdk-alpine AS build
+FROM --platform=$BUILDPLATFORM eclipse-temurin:21-jdk-alpine@sha256:fd52084c35bbac78890d95d57707d31ffc9d7a3324199e89c06be2a9dc71bfa0 AS build
 WORKDIR /app
 
 # Cache dependencies
@@ -27,7 +27,7 @@ RUN --mount=type=secret,id=maven_settings,target=/root/.m2/settings.xml,required
 # ---- Runtime Stage ----
 # The Noble variant publishes a linux/riscv64 image; the Alpine JRE currently
 # used by this project is limited to amd64 and arm64.
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:21-jre-noble@sha256:cd35bb33859641c5374415826a5951845104093eaa401cbe9d3d9023444f1c13
 # Keep the Alpine image's numeric IDs so existing storage volumes remain writable.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget && \

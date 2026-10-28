@@ -1,0 +1,930 @@
+{
+  "engine": "Semgrep OSS",
+  "version": "1.181.1",
+  "image": "semgrep/semgrep@sha256:3db5c7af55eb1f512eac0abf0ab69a97b52c74b5e9a27314c221aee1a78d7ab2",
+  "configs": [
+    "p/java",
+    "p/javascript",
+    "p/typescript",
+    "p/security-audit"
+  ],
+  "scope": [
+    "server/*/src/main",
+    "web/src"
+  ],
+  "excluded": [
+    "*.test.ts",
+    "*.test.tsx"
+  ],
+  "rulesRun": 176,
+  "scannedFiles": 1716,
+  "findings": [
+    {
+      "rule": "java.lang.security.audit.crypto.use-of-sha1.use-of-sha1",
+      "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/service/GithubSyncArchiveValidator.java",
+      "line": 396,
+      "severity": "WARNING",
+      "impact": "MEDIUM",
+      "message": "Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or SHA256 or SHA512 for other hash function applications."
+    },
+    {
+      "rule": "java.lang.security.audit.crypto.use-of-md5.use-of-md5",
+      "path": "server/skillhub-auth/src/main/java/com/iflytek/skillhub/auth/federation/adapter/LegacyOAuthIdentityCoordinate.java",
+      "line": 42,
+      "severity": "WARNING",
+      "impact": "MEDIUM",
+      "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not suitable as a cryptographic signature. Use HMAC instead."
+    },
+    {
+      "rule": "java.spring.security.audit.spring-sqli.spring-sqli",
+      "path": "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncPathPresenceRepository.java",
+      "line": 80,
+      "severity": "WARNING",
+      "impact": "MEDIUM",
+      "message": "Detected a string argument from a public method contract in a raw SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'."
+    },
+    {
+      "rule": "typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml",
+      "path": "web/src/features/skill/code-renderer.tsx",
+      "line": 43,
+      "severity": "WARNING",
+      "impact": "MEDIUM",
+      "message": "Detection of dangerouslySetInnerHTML from non-constant definition. This can inadvertently expose users to cross-site scripting (XSS) attacks if this comes from user-provided input. If you have to use dangerouslySetInnerHTML, consider using a sanitization library such as DOMPurify to sanitize your HTML."
+    }
+  ],
+  "errors": [],
+  "fixpointDiagnostics": [
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-app/src/main/java/com/iflytek/skillhub/repository/JpaGovernanceQueryRepository.java:112:29 [rules: 1, first: java.lang.security.audit.tainted-cmd-from-http-request.tainted-cmd-from-http-request]",
+      "location": {
+        "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/repository/JpaGovernanceQueryRepository.java",
+        "start": {
+          "line": 112,
+          "col": 30,
+          "offset": 5097
+        },
+        "end": {
+          "line": 112,
+          "col": 46,
+          "offset": 5113
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-app/src/main/java/com/iflytek/skillhub/service/SkillSuiteAppService.java:300:50 [rules: 1, first: java.lang.security.audit.formatted-sql-string.formatted-sql-string]",
+      "location": {
+        "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/service/SkillSuiteAppService.java",
+        "start": {
+          "line": 300,
+          "col": 51,
+          "offset": 15708
+        },
+        "end": {
+          "line": 300,
+          "col": 72,
+          "offset": 15729
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-app/src/main/java/com/iflytek/skillhub/service/bundle/SkillSuiteBundlePreviewPlanner.java:99:23 [rules: 3, first: java.spring.security.injection.tainted-sql-string.tainted-sql-string]",
+      "location": {
+        "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/service/bundle/SkillSuiteBundlePreviewPlanner.java",
+        "start": {
+          "line": 99,
+          "col": 24,
+          "offset": 4918
+        },
+        "end": {
+          "line": 99,
+          "col": 28,
+          "offset": 4922
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-auth/src/main/java/com/iflytek/skillhub/auth/policy/RouteSecurityPolicyRegistry.java:17:13 [rules: 2, first: java.spring.security.injection.tainted-file-path.tainted-file-path]",
+      "location": {
+        "path": "server/skillhub-auth/src/main/java/com/iflytek/skillhub/auth/policy/RouteSecurityPolicyRegistry.java",
+        "start": {
+          "line": 17,
+          "col": 14,
+          "offset": 602
+        },
+        "end": {
+          "line": 17,
+          "col": 41,
+          "offset": 629
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-domain/src/main/java/com/iflytek/skillhub/domain/skill/service/SkillPublishService.java:497:26 [rules: 4, first: java.spring.security.injection.tainted-sql-string.tainted-sql-string]",
+      "location": {
+        "path": "server/skillhub-domain/src/main/java/com/iflytek/skillhub/domain/skill/service/SkillPublishService.java",
+        "start": {
+          "line": 497,
+          "col": 27,
+          "offset": 23327
+        },
+        "end": {
+          "line": 497,
+          "col": 53,
+          "offset": 23353
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubOfficialLifecycleRepository.java:62:16 [rules: 2, first: java.lang.security.audit.formatted-sql-string.formatted-sql-string]",
+      "location": {
+        "path": "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubOfficialLifecycleRepository.java",
+        "start": {
+          "line": 62,
+          "col": 17,
+          "offset": 2794
+        },
+        "end": {
+          "line": 62,
+          "col": 23,
+          "offset": 2800
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncTaskRepository.java:650:38 [rules: 1, first: java.lang.security.audit.formatted-sql-string.formatted-sql-string]",
+      "location": {
+        "path": "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncTaskRepository.java",
+        "start": {
+          "line": 650,
+          "col": 39,
+          "offset": 40532
+        },
+        "end": {
+          "line": 650,
+          "col": 59,
+          "offset": 40552
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-search/src/main/java/com/iflytek/skillhub/search/postgres/PostgresFullTextQueryService.java:80:24 [rules: 1, first: java.spring.security.injection.tainted-system-command.tainted-system-command]",
+      "location": {
+        "path": "server/skillhub-search/src/main/java/com/iflytek/skillhub/search/postgres/PostgresFullTextQueryService.java",
+        "start": {
+          "line": 80,
+          "col": 25,
+          "offset": 3880
+        },
+        "end": {
+          "line": 80,
+          "col": 31,
+          "offset": 3886
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at server/skillhub-storage/src/main/java/com/iflytek/skillhub/storage/S3StorageService.java:301:40 [rules: 1, first: java.lang.security.audit.formatted-sql-string.formatted-sql-string]",
+      "location": {
+        "path": "server/skillhub-storage/src/main/java/com/iflytek/skillhub/storage/S3StorageService.java",
+        "start": {
+          "line": 301,
+          "col": 41,
+          "offset": 13387
+        },
+        "end": {
+          "line": 301,
+          "col": 56,
+          "offset": 13402
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/api/client.ts:1:0 [rules: 1, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/api/client.ts",
+        "start": {
+          "line": 1,
+          "col": 1,
+          "offset": 0
+        },
+        "end": {
+          "line": 1,
+          "col": 1,
+          "offset": 0
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/app/layout.tsx:26:16 [rules: 1, first: javascript.browser.security.raw-html-concat.raw-html-concat]",
+      "location": {
+        "path": "web/src/app/layout.tsx",
+        "start": {
+          "line": 26,
+          "col": 17,
+          "offset": 1836
+        },
+        "end": {
+          "line": 26,
+          "col": 23,
+          "offset": 1842
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/app/router.tsx:1:0 [rules: 8, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/app/router.tsx",
+        "start": {
+          "line": 1,
+          "col": 1,
+          "offset": 0
+        },
+        "end": {
+          "line": 1,
+          "col": 1,
+          "offset": 0
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/github-sync/github-credential-config.tsx:13:16 [rules: 1, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/features/github-sync/github-credential-config.tsx",
+        "start": {
+          "line": 13,
+          "col": 17,
+          "offset": 706
+        },
+        "end": {
+          "line": 13,
+          "col": 39,
+          "offset": 728
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/github-sync/github-deep-discovery-config.tsx:16:16 [rules: 2, first: javascript.express.security.cors-misconfiguration.cors-misconfiguration]",
+      "location": {
+        "path": "web/src/features/github-sync/github-deep-discovery-config.tsx",
+        "start": {
+          "line": 16,
+          "col": 17,
+          "offset": 894
+        },
+        "end": {
+          "line": 16,
+          "col": 42,
+          "offset": 919
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/github-sync/github-deep-discovery-repository-drawer.tsx:12:16 [rules: 3, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/features/github-sync/github-deep-discovery-repository-drawer.tsx",
+        "start": {
+          "line": 12,
+          "col": 17,
+          "offset": 611
+        },
+        "end": {
+          "line": 12,
+          "col": 52,
+          "offset": 646
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/github-sync/github-discovery-config.tsx:19:16 [rules: 4, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/features/github-sync/github-discovery-config.tsx",
+        "start": {
+          "line": 19,
+          "col": 17,
+          "offset": 1156
+        },
+        "end": {
+          "line": 19,
+          "col": 38,
+          "offset": 1177
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/github-sync/github-sync-repositories.tsx:32:16 [rules: 1, first: javascript.express.security.cors-misconfiguration.cors-misconfiguration]",
+      "location": {
+        "path": "web/src/features/github-sync/github-sync-repositories.tsx",
+        "start": {
+          "line": 32,
+          "col": 17,
+          "offset": 2280
+        },
+        "end": {
+          "line": 32,
+          "col": 33,
+          "offset": 2296
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/github-sync/github-sync-repositories.tsx:90:16 [rules: 1, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/features/github-sync/github-sync-repositories.tsx",
+        "start": {
+          "line": 90,
+          "col": 17,
+          "offset": 9768
+        },
+        "end": {
+          "line": 90,
+          "col": 39,
+          "offset": 9790
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/namespace/create-namespace-dialog.tsx:89:16 [rules: 2, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/features/namespace/create-namespace-dialog.tsx",
+        "start": {
+          "line": 89,
+          "col": 17,
+          "offset": 2883
+        },
+        "end": {
+          "line": 89,
+          "col": 38,
+          "offset": 2904
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/namespace/invitation-controls.tsx:17:16 [rules: 4, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/features/namespace/invitation-controls.tsx",
+        "start": {
+          "line": 17,
+          "col": 17,
+          "offset": 896
+        },
+        "end": {
+          "line": 17,
+          "col": 35,
+          "offset": 914
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/namespace/invitation-history.tsx:20:16 [rules: 1, first: javascript.express.security.require-request.require-request]",
+      "location": {
+        "path": "web/src/features/namespace/invitation-history.tsx",
+        "start": {
+          "line": 20,
+          "col": 17,
+          "offset": 865
+        },
+        "end": {
+          "line": 20,
+          "col": 34,
+          "offset": 882
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/suite/suite-bundle-import.tsx:54:16 [rules: 1, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/features/suite/suite-bundle-import.tsx",
+        "start": {
+          "line": 54,
+          "col": 17,
+          "offset": 1983
+        },
+        "end": {
+          "line": 54,
+          "col": 34,
+          "offset": 2000
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/token/create-token-dialog.tsx:41:16 [rules: 3, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/features/token/create-token-dialog.tsx",
+        "start": {
+          "line": 41,
+          "col": 17,
+          "offset": 1292
+        },
+        "end": {
+          "line": 41,
+          "col": 34,
+          "offset": 1309
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/features/token/token-list.tsx:43:16 [rules: 3, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/features/token/token-list.tsx",
+        "start": {
+          "line": 43,
+          "col": 17,
+          "offset": 1614
+        },
+        "end": {
+          "line": 43,
+          "col": 26,
+          "offset": 1623
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/admin/audit-log.tsx:50:16 [rules: 1, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/admin/audit-log.tsx",
+        "start": {
+          "line": 50,
+          "col": 17,
+          "offset": 2156
+        },
+        "end": {
+          "line": 50,
+          "col": 29,
+          "offset": 2168
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/admin/labels.tsx:118:16 [rules: 1, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/pages/admin/labels.tsx",
+        "start": {
+          "line": 118,
+          "col": 17,
+          "offset": 3733
+        },
+        "end": {
+          "line": 118,
+          "col": 32,
+          "offset": 3748
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/admin/system-config.tsx:13:16 [rules: 4, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/admin/system-config.tsx",
+        "start": {
+          "line": 13,
+          "col": 17,
+          "offset": 675
+        },
+        "end": {
+          "line": 13,
+          "col": 33,
+          "offset": 691
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/cli-auth.tsx:48:16 [rules: 2, first: javascript.express.security.require-request.require-request]",
+      "location": {
+        "path": "web/src/pages/cli-auth.tsx",
+        "start": {
+          "line": 48,
+          "col": 17,
+          "offset": 1659
+        },
+        "end": {
+          "line": 48,
+          "col": 28,
+          "offset": 1670
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/github-deep-discovery.tsx:70:16 [rules: 4, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/dashboard/github-deep-discovery.tsx",
+        "start": {
+          "line": 70,
+          "col": 17,
+          "offset": 4724
+        },
+        "end": {
+          "line": 70,
+          "col": 40,
+          "offset": 4747
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/my-skills.tsx:46:16 [rules: 1, first: javascript.browser.security.raw-html-concat.raw-html-concat]",
+      "location": {
+        "path": "web/src/pages/dashboard/my-skills.tsx",
+        "start": {
+          "line": 46,
+          "col": 17,
+          "offset": 2416
+        },
+        "end": {
+          "line": 46,
+          "col": 29,
+          "offset": 2428
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/my-suites.tsx:21:16 [rules: 1, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/dashboard/my-suites.tsx",
+        "start": {
+          "line": 21,
+          "col": 17,
+          "offset": 1122
+        },
+        "end": {
+          "line": 21,
+          "col": 29,
+          "offset": 1134
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/namespace-members.tsx:45:16 [rules: 1, first: javascript.express.security.cors-misconfiguration.cors-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/dashboard/namespace-members.tsx",
+        "start": {
+          "line": 45,
+          "col": 17,
+          "offset": 1900
+        },
+        "end": {
+          "line": 45,
+          "col": 37,
+          "offset": 1920
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/publish.tsx:41:16 [rules: 6, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/dashboard/publish.tsx",
+        "start": {
+          "line": 41,
+          "col": 17,
+          "offset": 1896
+        },
+        "end": {
+          "line": 41,
+          "col": 28,
+          "offset": 1907
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/reports.tsx:31:16 [rules: 5, first: javascript.express.security.express-insecure-template-usage.express-insecure-template-usage]",
+      "location": {
+        "path": "web/src/pages/dashboard/reports.tsx",
+        "start": {
+          "line": 31,
+          "col": 17,
+          "offset": 1364
+        },
+        "end": {
+          "line": 31,
+          "col": 28,
+          "offset": 1375
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/review-progress.tsx:27:16 [rules: 1, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/pages/dashboard/review-progress.tsx",
+        "start": {
+          "line": 27,
+          "col": 17,
+          "offset": 1473
+        },
+        "end": {
+          "line": 27,
+          "col": 35,
+          "offset": 1491
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/reviews.tsx:39:16 [rules: 6, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/dashboard/reviews.tsx",
+        "start": {
+          "line": 39,
+          "col": 17,
+          "offset": 1651
+        },
+        "end": {
+          "line": 39,
+          "col": 28,
+          "offset": 1662
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/suite-editor.tsx:35:16 [rules: 1, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/pages/dashboard/suite-editor.tsx",
+        "start": {
+          "line": 35,
+          "col": 17,
+          "offset": 1671
+        },
+        "end": {
+          "line": 35,
+          "col": 28,
+          "offset": 1682
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/dashboard/suite-management.tsx:31:16 [rules: 6, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/dashboard/suite-management.tsx",
+        "start": {
+          "line": 31,
+          "col": 17,
+          "offset": 1668
+        },
+        "end": {
+          "line": 31,
+          "col": 36,
+          "offset": 1687
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/device.tsx:20:16 [rules: 1, first: javascript.express.security.audit.express-path-join-resolve-traversal.express-path-join-resolve-traversal]",
+      "location": {
+        "path": "web/src/pages/device.tsx",
+        "start": {
+          "line": 20,
+          "col": 17,
+          "offset": 694
+        },
+        "end": {
+          "line": 20,
+          "col": 31,
+          "offset": 708
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/landing.tsx:154:9 [rules: 2, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/landing.tsx",
+        "start": {
+          "line": 154,
+          "col": 10,
+          "offset": 6885
+        },
+        "end": {
+          "line": 154,
+          "col": 27,
+          "offset": 6902
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/landing.tsx:257:16 [rules: 1, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/landing.tsx",
+        "start": {
+          "line": 257,
+          "col": 17,
+          "offset": 14527
+        },
+        "end": {
+          "line": 257,
+          "col": 28,
+          "offset": 14538
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/register.tsx:55:16 [rules: 1, first: javascript.express.security.injection.raw-html-format.raw-html-format]",
+      "location": {
+        "path": "web/src/pages/register.tsx",
+        "start": {
+          "line": 55,
+          "col": 17,
+          "offset": 1789
+        },
+        "end": {
+          "line": 55,
+          "col": 29,
+          "offset": 1801
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/settings/profile.tsx:40:16 [rules: 1, first: javascript.express.security.require-request.require-request]",
+      "location": {
+        "path": "web/src/pages/settings/profile.tsx",
+        "start": {
+          "line": 40,
+          "col": 17,
+          "offset": 1638
+        },
+        "end": {
+          "line": 40,
+          "col": 36,
+          "offset": 1657
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/skill-detail.tsx:133:16 [rules: 7, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/skill-detail.tsx",
+        "start": {
+          "line": 133,
+          "col": 17,
+          "offset": 6492
+        },
+        "end": {
+          "line": 133,
+          "col": 32,
+          "offset": 6507
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/skill-version-compare.tsx:22:16 [rules: 4, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/skill-version-compare.tsx",
+        "start": {
+          "line": 22,
+          "col": 17,
+          "offset": 827
+        },
+        "end": {
+          "line": 22,
+          "col": 40,
+          "offset": 850
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/pages/suite-detail.tsx:22:16 [rules: 2, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/pages/suite-detail.tsx",
+        "start": {
+          "line": 22,
+          "col": 17,
+          "offset": 1369
+        },
+        "end": {
+          "line": 22,
+          "col": 32,
+          "offset": 1384
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/shared/components/landing-quick-start.tsx:131:9 [rules: 1, first: javascript.lang.security.detect-eval-with-expression.detect-eval-with-expression]",
+      "location": {
+        "path": "web/src/shared/components/landing-quick-start.tsx",
+        "start": {
+          "line": 131,
+          "col": 10,
+          "offset": 7581
+        },
+        "end": {
+          "line": 131,
+          "col": 24,
+          "offset": 7595
+        }
+      }
+    },
+    {
+      "error_type": "Fixpoint timeout",
+      "severity": "warn",
+      "message": "Fixpoint timeout while performing taint analysis at web/src/shared/components/user-menu.tsx:24:16 [rules: 3, first: javascript.express.security.x-frame-options-misconfiguration.x-frame-options-misconfiguration]",
+      "location": {
+        "path": "web/src/shared/components/user-menu.tsx",
+        "start": {
+          "line": 24,
+          "col": 17,
+          "offset": 754
+        },
+        "end": {
+          "line": 24,
+          "col": 25,
+          "offset": 762
+        }
+      }
+    }
+  ],
+  "errorGate": {
+    "rulesRun": 50,
+    "scannedFiles": 1579,
+    "findings": 0,
+    "errors": 0,
+    "fixpointDiagnosticCount": 46
+  },
+  "organizationPolicy": "Not available; public-rule reference evidence only"
+}

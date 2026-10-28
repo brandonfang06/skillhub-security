@@ -16,9 +16,9 @@ import com.iflytek.skillhub.dto.PromotionResponseDto;
 import com.iflytek.skillhub.repository.GovernanceQueryRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,31 +52,31 @@ class PromotionPortalControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private PromotionService promotionService;
 
-    @MockBean
+    @MockitoBean
     private PromotionRequestRepository promotionRequestRepository;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private DeviceAuthService deviceAuthService;
 
-    @MockBean
+    @MockitoBean
     private com.iflytek.skillhub.domain.namespace.NamespaceRepository namespaceRepository;
 
-    @MockBean
+    @MockitoBean
     private GovernanceQueryRepository governanceQueryRepository;
 
-    @MockBean
+    @MockitoBean
     private RbacService rbacService;
 
-    @MockBean
+    @MockitoBean
     private ReviewPermissionChecker permissionChecker;
 
-    @MockBean
+    @MockitoBean
     private AuditLogService auditLogService;
 
     @Test

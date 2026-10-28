@@ -8,7 +8,7 @@ import org.redisson.api.RStream;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -54,8 +54,8 @@ class RedisClusterIntegrationTest {
                 new LettuceConnectionFactory(clusterConfiguration, clientConfiguration.build());
         connectionFactory.afterPropertiesSet();
 
-        RedisProperties properties = new RedisProperties();
-        RedisProperties.Cluster cluster = new RedisProperties.Cluster();
+        DataRedisProperties properties = new DataRedisProperties();
+        DataRedisProperties.Cluster cluster = new DataRedisProperties.Cluster();
         cluster.setNodes(nodes);
         properties.setCluster(cluster);
         properties.setUsername(username);

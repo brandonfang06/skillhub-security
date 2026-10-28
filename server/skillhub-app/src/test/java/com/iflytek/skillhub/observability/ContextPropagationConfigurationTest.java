@@ -9,6 +9,7 @@ import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.micrometer.tracing.opentelemetry.autoconfigure.OpenTelemetryEventPublisherBeansApplicationListener;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -31,6 +32,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ContextPropagationConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withInitializer(context -> {
+                OpenTelemetryEventPublisherBeansApplicationListener.addWrapper();
+                context.addApplicationListener(new OpenTelemetryEventPublisherBeansApplicationListener());
+            })
             .withUserConfiguration(TestApplication.class)
             .withPropertyValues(
                     "spring.flyway.enabled=false",

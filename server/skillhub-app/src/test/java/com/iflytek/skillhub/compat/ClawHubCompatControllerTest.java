@@ -28,9 +28,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -66,37 +66,37 @@ class ClawHubCompatControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private DeviceAuthService deviceAuthService;
 
-    @MockBean
+    @MockitoBean
     private SkillSearchAppService skillSearchAppService;
 
-    @MockBean
+    @MockitoBean
     private SkillLabelProjectionService skillLabelProjectionService;
 
-    @MockBean
+    @MockitoBean
     private SkillQueryService skillQueryService;
 
-    @MockBean
+    @MockitoBean
     private ApiTokenService apiTokenService;
 
-    @MockBean
+    @MockitoBean
     private UserAccountRepository userAccountRepository;
 
-    @MockBean
+    @MockitoBean
     private UserRoleBindingRepository userRoleBindingRepository;
 
-    @MockBean
+    @MockitoBean
     private CompatSkillLookupService compatSkillLookupService;
 
-    @MockBean
+    @MockitoBean
     private SkillPublishService skillPublishService;
 
-    @MockBean
+    @MockitoBean
     private AuditLogService auditLogService;
 
     @Test

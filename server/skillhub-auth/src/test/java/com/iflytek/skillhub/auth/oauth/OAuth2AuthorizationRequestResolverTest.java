@@ -116,6 +116,8 @@ class OAuth2AuthorizationRequestResolverTest {
         // client-secret-post rather than none, so Spring does not apply PKCE. The DingTalk token
         // request sends no code_verifier, so a challenge on the authorize URI could not be answered.
         assertThat(authorizationRequest.getAuthorizationRequestUri()).doesNotContain("code_challenge");
+        assertThat(authorizationRequest.getAttributes()).doesNotContainKey("code_verifier");
+        assertThat(authorizationRequest.getAdditionalParameters()).doesNotContainKeys("code_challenge", "code_challenge_method");
     }
 
     @Test

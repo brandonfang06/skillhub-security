@@ -32,8 +32,16 @@ public class DingTalkAuthorizationRequestCustomizer implements ProviderAuthoriza
 
     @Override
     public void customize(OAuth2AuthorizationRequest.Builder builder) {
+        // DingTalk does not support PKCE; Spring Security 7 also enables it for confidential clients.
+        builder.attributes(attributes -> attributes.remove("code_verifier"));
+        builder.additionalParameters(parameters -> {
+            parameters.remove("code_challenge");
+            parameters.remove("code_challenge_method");
+        });
         String authorizationRequestUri = UriComponentsBuilder
                 .fromUriString(builder.build().getAuthorizationRequestUri())
+                .replaceQueryParam("code_challenge")
+                .replaceQueryParam("code_challenge_method")
                 .replaceQueryParam("scope", DingTalkOAuth2Constants.AUTHORIZATION_SCOPE)
                 .replaceQueryParam("prompt", "consent")
                 .build(true)

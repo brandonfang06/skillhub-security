@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -40,25 +40,25 @@ class DirectAuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private LocalAuthService localAuthService;
 
-    @MockBean
+    @MockitoBean
     private NamespaceMemberRepository namespaceMemberRepository;
 
-    @MockBean
+    @MockitoBean
     private AuthFailureThrottleService authFailureThrottleService;
 
-    @MockBean
+    @MockitoBean
     private UserAccountRepository userAccountRepository;
 
-    @MockBean
+    @MockitoBean
     private UserRoleBindingRepository userRoleBindingRepository;
 
-    @MockBean
+    @MockitoBean
     private LocalCredentialRepository localCredentialRepository;
 
-    @MockBean
+    @MockitoBean
     private LocalAuthSettingsService localAuthSettingsService;
 
     @org.junit.jupiter.api.BeforeEach

@@ -17,7 +17,7 @@ public interface AuditLogJpaRepository extends JpaRepository<AuditLog, Long>, Jp
 
     @Override
     default Page<AuditLog> search(String actorUserId, String action, Pageable pageable) {
-        Specification<AuditLog> specification = Specification.where(null);
+        Specification<AuditLog> specification = Specification.unrestricted();
         if (actorUserId != null && !actorUserId.isBlank()) {
             specification = specification.and((root, query, cb) -> cb.equal(root.get("actorUserId"), actorUserId));
         }

@@ -657,12 +657,12 @@ OTel SDK 模式的最小配置：
 SKILLHUB_TRACING_MODE=otel-sdk
 SKILLHUB_LOG_FORMAT=json
 SKILLHUB_TRACING_SAMPLING_PROBABILITY=0.1
-MANAGEMENT_OTLP_TRACING_ENDPOINT=http://otel-collector:4318/v1/traces
+MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
 SKILLHUB_OTLP_TIMEOUT=5s
 SKILLHUB_OTLP_COMPRESSION=gzip
 ```
 
-未设置 `MANAGEMENT_OTLP_TRACING_ENDPOINT` 时，`otel-sdk` 仍可建立进程内 Trace，但不会
+未设置 `MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT` 时，`otel-sdk` 仍可建立进程内 Trace，但不会
 创建 OTLP Exporter，也不会尝试连接默认地址。`none` 或 `external-agent` 模式配置
 endpoint 会启动失败。
 
@@ -736,7 +736,7 @@ SkyWalking 中没有被保留的 Trace。这是头部采样的预期行为。
 遇到观测后端异常时：
 
 1. 将 `SKILLHUB_TRACING_MODE` 改为 `none`。
-2. 删除 `MANAGEMENT_OTLP_TRACING_ENDPOINT`。
+2. 删除 `MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT`。
 3. 需要进一步降低日志开销时，将 `SKILLHUB_LOG_FORMAT` 改为 `text`。
 4. 滚动重启 Server。
 

@@ -31,10 +31,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -92,9 +92,9 @@ class NamespaceInvitationPostgresTest {
     @Autowired private UserAccountJpaRepository users;
     @Autowired private PlatformTransactionManager transactionManager;
     @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
-    @MockBean private SkillRepository skills;
-    @MockBean private ReviewTaskRepository reviewTasks;
-    @MockBean private PromotionRequestRepository promotions;
+    @MockitoBean private SkillRepository skills;
+    @MockitoBean private ReviewTaskRepository reviewTasks;
+    @MockitoBean private PromotionRequestRepository promotions;
 
     @Test
     void twoConcurrentAcceptsCreateOnlyOneMemberAndOneConsumption() throws Exception {

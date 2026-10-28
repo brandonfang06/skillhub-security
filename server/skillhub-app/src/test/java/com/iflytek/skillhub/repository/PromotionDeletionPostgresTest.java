@@ -30,10 +30,10 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -90,9 +90,9 @@ class PromotionDeletionPostgresTest {
     @Autowired private SkillHardDeleteService deletion;
     @Autowired private PlatformTransactionManager transactions;
     @Autowired private JdbcTemplate jdbc;
-    @MockBean private ObjectStorageService storage;
-    @MockBean private SkillStorageDeletionCompensationService compensation;
-    @MockBean private SecurityScanService scanning;
+    @MockitoBean private ObjectStorageService storage;
+    @MockitoBean private SkillStorageDeletionCompensationService compensation;
+    @MockitoBean private SecurityScanService scanning;
 
     @Test
     void rejectedUpdateDoesNotRemoveThePublishedPromotion() {

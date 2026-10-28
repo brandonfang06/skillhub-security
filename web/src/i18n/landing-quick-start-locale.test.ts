@@ -53,7 +53,7 @@ describe('landing quick start locales', () => {
     expect(skillGuideTemplate).toContain('even when it prints `SkillHub CLI <version>`')
     expect(skillGuideTemplate).toContain('does not authorize removing another `skillhub` launcher')
     expect(skillGuideTemplate).toContain('Treat `<registry>` below as a value to replace')
-    expect(skillGuideTemplate).toContain([
+    expect(skillGuideTemplate.replace(/\r\n/g, '\n')).toContain([
       'skillhub install @global/skillhub-cli \\',
       '  --scope user',
     ].join('\n'))

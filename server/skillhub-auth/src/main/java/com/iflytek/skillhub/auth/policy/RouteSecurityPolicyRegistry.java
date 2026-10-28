@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -450,8 +450,8 @@ public class RouteSecurityPolicyRegistry {
 
         public RequestMatcher toRequestMatcher() {
             return method == null
-                    ? new AntPathRequestMatcher(pattern)
-                    : new AntPathRequestMatcher(pattern, method.name());
+                    ? PathPatternRequestMatcher.withDefaults().matcher(pattern)
+                    : PathPatternRequestMatcher.withDefaults().matcher(method, pattern);
         }
 
         boolean matches(String requestMethod, String requestPath, AntPathMatcher matcher) {

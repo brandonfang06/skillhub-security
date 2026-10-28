@@ -7,7 +7,6 @@ import com.iflytek.skillhub.dto.AdminNamespaceListStatsResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.data.domain.Page;
@@ -24,21 +23,32 @@ public class JpaAdminNamespaceQueryRepository implements AdminNamespaceQueryRepo
 
     @Override
     public Page<Namespace> search(String keyword, NamespaceStatus status, NamespaceType type, Pageable pageable) {
-        Map<String, Object> params = new HashMap<>();
-        String whereClause = buildWhereClause(keyword, status, type, params);
-        String orderClause = " ORDER BY n.updatedAt DESC, n.slug ASC";
+        String pattern = StringUtils.hasText(keyword) ? "%" + keyword.trim().toLowerCase() + "%" : null;
 
         TypedQuery<Namespace> query = entityManager.createQuery(
-                "SELECT n FROM Namespace n" + whereClause + orderClause,
+                """
+                SELECT n FROM Namespace n
+                WHERE (:keyword IS NULL OR LOWER(n.slug) LIKE :keyword
+                    OR LOWER(n.displayName) LIKE :keyword OR LOWER(n.description) LIKE :keyword)
+                    AND (:status IS NULL OR n.status = :status)
+                    AND (:type IS NULL OR n.type = :type)
+                ORDER BY n.updatedAt DESC, n.slug ASC
+                """,
                 Namespace.class);
-        params.forEach(query::setParameter);
+        query.setParameter("keyword", pattern).setParameter("status", status).setParameter("type", type);
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
 
         TypedQuery<Long> countQuery = entityManager.createQuery(
-                "SELECT COUNT(n) FROM Namespace n" + whereClause,
+                """
+                SELECT COUNT(n) FROM Namespace n
+                WHERE (:keyword IS NULL OR LOWER(n.slug) LIKE :keyword
+                    OR LOWER(n.displayName) LIKE :keyword OR LOWER(n.description) LIKE :keyword)
+                    AND (:status IS NULL OR n.status = :status)
+                    AND (:type IS NULL OR n.type = :type)
+                """,
                 Long.class);
-        params.forEach(countQuery::setParameter);
+        countQuery.setParameter("keyword", pattern).setParameter("status", status).setParameter("type", type);
 
         return new PageImpl<>(query.getResultList(), pageable, countQuery.getSingleResult());
     }
@@ -70,26 +80,6 @@ public class JpaAdminNamespaceQueryRepository implements AdminNamespaceQueryRepo
                 WHERE s.namespaceId IN :namespaceIds
                 GROUP BY s.namespaceId
                 """, namespaceIds);
-    }
-
-    private String buildWhereClause(String keyword,
-                                    NamespaceStatus status,
-                                    NamespaceType type,
-                                    Map<String, Object> params) {
-        StringBuilder where = new StringBuilder(" WHERE 1 = 1");
-        if (StringUtils.hasText(keyword)) {
-            where.append(" AND (LOWER(n.slug) LIKE :keyword OR LOWER(n.displayName) LIKE :keyword OR LOWER(n.description) LIKE :keyword)");
-            params.put("keyword", "%" + keyword.trim().toLowerCase() + "%");
-        }
-        if (status != null) {
-            where.append(" AND n.status = :status");
-            params.put("status", status);
-        }
-        if (type != null) {
-            where.append(" AND n.type = :type");
-            params.put("type", type);
-        }
-        return where.toString();
     }
 
     private long countByStatus(NamespaceStatus status) {

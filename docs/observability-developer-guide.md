@@ -20,7 +20,7 @@
 
 - `none`：默认模式。无应用内 OTel SDK 和 OTLP 导出，只保留 `request.id`。
 - `otel-sdk`：使用 Micrometer Tracing + OTel Bridge；配置
-  `MANAGEMENT_OTLP_TRACING_ENDPOINT` 后才向 Collector 导出。
+  `MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT` 后才向 Collector 导出。
 - `external-agent`：应用内 Tracer 为 NOOP，由部署环境提供唯一的外部 Agent。
   SkillHub 只能校验自身配置，不能识别任意 JVM Agent；唯一 Agent 是部署检查项。
 

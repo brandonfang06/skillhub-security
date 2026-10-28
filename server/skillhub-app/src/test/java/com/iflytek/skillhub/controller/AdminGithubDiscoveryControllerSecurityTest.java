@@ -6,9 +6,9 @@ import com.iflytek.skillhub.service.GithubDiscoveryAdminAppService;
 import com.iflytek.skillhub.service.GithubSearchPreviewAppService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -68,8 +68,8 @@ class AdminGithubDiscoveryControllerSecurityTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper mapper;
-    @MockBean private GithubDiscoveryAdminAppService discovery;
-    @MockBean private GithubSearchPreviewAppService previews;
+    @MockitoBean private GithubDiscoveryAdminAppService discovery;
+    @MockitoBean private GithubSearchPreviewAppService previews;
 
     @Test
     void anonymousAndOrdinaryUserCannotReadRulesOrQueuePreview() throws Exception {

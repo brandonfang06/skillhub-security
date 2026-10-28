@@ -10,9 +10,9 @@ import com.iflytek.skillhub.dto.cli.CliDryRunResponse;
 import com.iflytek.skillhub.service.cli.CliSkillAppService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,10 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class CliDryRunValidateTest {
     @Autowired MockMvc mockMvc;
-    @MockBean CliSkillAppService cliSkillAppService;
-    @MockBean ApiTokenService apiTokenService;
-    @MockBean UserAccountRepository userAccountRepository;
-    @MockBean UserRoleBindingRepository userRoleBindingRepository;
+    @MockitoBean CliSkillAppService cliSkillAppService;
+    @MockitoBean ApiTokenService apiTokenService;
+    @MockitoBean UserAccountRepository userAccountRepository;
+    @MockitoBean UserRoleBindingRepository userRoleBindingRepository;
 
     private void givenValidPublishToken() {
         ApiToken token = new ApiToken("user-1", "cli", "sk_test", "hash", "[\"skill:publish\"]");
