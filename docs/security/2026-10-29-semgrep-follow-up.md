@@ -152,3 +152,30 @@ artifacts are available in this repository's Actions tab.
 Organization acceptance remains unresolved. No company report was requested
 again or transferred. The existing 48-hour release watch now includes this
 expanded source-analysis baseline and the unresolved 31-finding context.
+
+## Published backend verification
+
+Backend fix commit: `b252a27cae758bdff3e1b832ac84bba9f33ea53b` on `dev`.
+[Code/dependency security run 40900064705](https://github.com/brandonfang06/skillhub-security/actions/runs/40900064705)
+and [CodeQL run 40900064817](https://github.com/brandonfang06/skillhub-security/actions/runs/40900064817)
+both passed for that exact commit.
+
+- Java CodeQL: 53 -> 44 findings. All eight tainted-arithmetic findings and the
+  sensitive-log finding disappeared. Zero security-severity >= 9.0 findings.
+  JavaScript remained at 17 findings, none in `web/src`, and zero >= 9.0.
+- CI Semgrep: 2,909 files, 187 findings; primary-scope blocking findings and
+  application analysis errors remain zero. The CI/local total-count difference
+  is a non-literal-regexp warning in a frontend end-to-end test (including
+  duplicate matches); it does not affect the production gate. Three Java main
+  source warnings remain: Git SHA-1, legacy identifier MD5, and the bound-parameter
+  `JdbcGithubSyncPathPresenceRepository.batchUpdate` statement.
+- Actual dependency coverage: 347 Java package entries and 737 frontend package
+  entries, zero Critical vulnerabilities in each uploaded report.
+- Source fixes passed 76 focused backend tests, including the real service's
+  validation through the authenticated governance HTTP route. The broader 242
+  security regression tests passed before this final focused patch.
+
+The accompanying `2026-10-29-backend-verification.json` records report hashes,
+run IDs, coverage and result counts. Full reports are retained in Actions
+artifacts. Remaining lower-severity findings are visible; no organization scan
+acceptance or resolution of the unavailable 31-result set is asserted.

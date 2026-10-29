@@ -1,0 +1,66 @@
+{
+  "sourceCommit": "b252a27cae758bdff3e1b832ac84bba9f33ea53b",
+  "securityRun": 40900064705,
+  "codeqlRun": 40900064817,
+  "organizationSemgrepCriticalFindings": {
+    "reported": 31,
+    "status": "unverified; report cannot be exported"
+  },
+  "focusedBackendTests": 76,
+  "broaderSecurityRegressionTestsBeforeFinalPatch": 242,
+  "reports": [
+    {
+      "file": "frontend-critical.json",
+      "sha256": "b408744bdf5f607b58bbdb81734488f140899bfff39b5ce65327702e41db36c6",
+      "packages": 737,
+      "criticalVulnerabilities": 0
+    },
+    {
+      "file": "java-critical.json",
+      "sha256": "5fdd0549de506ab73ce0857ecc9d795871946d934229c267d2a12c8ad56b5129",
+      "packages": 347,
+      "criticalVulnerabilities": 0
+    },
+    {
+      "file": "semgrep.json",
+      "sha256": "194b2c8b421d532868aebd5d3c6399c4320c3bf70ba7b1db123066fd1a6f8599",
+      "scannedFiles": 2909,
+      "findings": 187,
+      "severityCounts": {
+        "INFO": 5,
+        "WARNING": 180,
+        "ERROR": 1,
+        "MEDIUM": 1
+      },
+      "primaryBlockingFindings": 0,
+      "applicationAnalysisErrors": 0,
+      "workflowTemplateDiagnostics": 36
+    },
+    {
+      "file": "java.sarif",
+      "sha256": "bec87a75b198261706b4441d93b8b11f689c93b4c881de5abf21bd1ca06b1835",
+      "findings": 44,
+      "criticalSecuritySeverityFindings": 0,
+      "ruleCounts": {
+        "java/spring-disabled-csrf-protection": 1,
+        "java/relative-path-command": 16,
+        "java/log-injection": 20,
+        "java/potentially-weak-cryptographic-algorithm": 2,
+        "java/user-controlled-bypass": 4,
+        "java/unreleased-lock": 1
+      }
+    },
+    {
+      "file": "javascript.sarif",
+      "sha256": "f6d5889945edbe579c1d3d8db86f725255ec9e8c9b4cfef8973df4156233e56b",
+      "findings": 17,
+      "criticalSecuritySeverityFindings": 0,
+      "ruleCounts": {
+        "js/file-system-race": 6,
+        "js/empty-password-in-configuration-file": 6,
+        "js/http-to-file-access": 1,
+        "js/insecure-temporary-file": 4
+      }
+    }
+  ]
+}
