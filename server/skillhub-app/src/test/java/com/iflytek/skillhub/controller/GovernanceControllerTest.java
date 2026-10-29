@@ -98,6 +98,18 @@ class GovernanceControllerTest {
     }
 
     @Test
+    void inbox_rejectsOversizedFetchWindowWithBadRequest() throws Exception {
+        when(rbacService.getUserRoleCodes("admin")).thenReturn(Set.of("SKILL_ADMIN"));
+        when(governanceWorkbenchAppService.listInbox("admin", Map.of(), Set.of("SKILL_ADMIN"), null, 100, 100))
+                .thenCallRealMethod();
+
+        mockMvc.perform(get("/api/v1/governance/inbox")
+                        .param("page", "100").param("size", "100")
+                        .with(auth("admin", Set.of("SKILL_ADMIN"))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void activity_returnsGovernanceActivity() throws Exception {
         when(rbacService.getUserRoleCodes("admin")).thenReturn(Set.of("SKILL_ADMIN"));
         when(governanceWorkbenchAppService.listActivity(Set.of("SKILL_ADMIN"), 0, 20))

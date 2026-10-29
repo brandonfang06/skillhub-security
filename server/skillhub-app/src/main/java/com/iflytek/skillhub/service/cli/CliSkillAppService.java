@@ -99,7 +99,7 @@ public class CliSkillAppService {
         List<CliNamespaceSyncItemResponse> items = skills.getContent().stream()
                 .map(skill -> toNamespaceSyncItem(skill, namespace, userId, roles))
                 .toList();
-        String nextCursor = skills.hasNext() ? String.valueOf(page + 1) : null;
+        String nextCursor = skills.hasNext() && page < Integer.MAX_VALUE ? String.valueOf(page + 1) : null;
         return new CliNamespaceSyncResponse(items, nextCursor);
     }
 

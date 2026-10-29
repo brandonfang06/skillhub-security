@@ -315,6 +315,16 @@ class MySkillAppServiceTest {
     }
 
     @Test
+    void filteredSkillsAcceptLargePageWithoutWrappingToNegativeIndex() {
+        given(skillRepository.findByOwnerId("user-1")).willReturn(List.of());
+
+        var result = service.listMySkills("user-1", Integer.MAX_VALUE, 10, null, "alpha", null, Set.of("USER"));
+
+        assertThat(result.items()).isEmpty();
+        assertThat(result.total()).isZero();
+    }
+
+    @Test
     void listMySkills_filtersByKeywordAcrossDisplayNameSlugAndSummary() {
         Skill alpha = createSkill(1L, 101L, "alpha-tool", "user-1");
         alpha.setDisplayName("Alpha Assistant");

@@ -50,6 +50,39 @@ class SkillSuiteBundleStagedCleanupServiceTest {
     }
 
     @Test
+    void cleanupFailureDoesNotLogPreviewTokenOrStorageExceptionContents() {
+        var logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(SkillSuiteBundleStagedCleanupService.class);
+        var appender = new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+        var previousLevel = logger.getLevel();
+        logger.setLevel(ch.qos.logback.classic.Level.WARN);
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            SkillSuiteBundlePreviewSession preview = preview();
+            preview.markExpired();
+            String privateToken = "private-preview-capability";
+            when(previewRepository.findByIdForUpdate(privateToken)).thenReturn(Optional.of(preview));
+            when(operationRepository.findByPreviewToken(privateToken)).thenReturn(Optional.empty());
+            when(objectMapper.convertValue(preview.getPlan(), SkillSuiteBundlePreviewPlanner.PreviewPlan.class)).thenReturn(plan());
+            doThrow(new IllegalStateException("private-storage-credential")).when(storage)
+                .deleteObjects(org.mockito.ArgumentMatchers.anyList());
+
+            service.cleanupExpiredPreview(privateToken);
+
+            assertThat(appender.list).isNotEmpty();
+            assertThat(appender.list).allSatisfy(event -> {
+                assertThat(event.getFormattedMessage()).doesNotContain(privateToken, "private-storage-credential");
+                assertThat(event.getThrowableProxy()).isNull();
+            });
+            assertThat(preview.getStagedCleanupFailureCode()).isEqualTo("STORAGE_DELETE_FAILED");
+        } finally {
+            logger.setLevel(previousLevel);
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
     void deletesOnlyBoundStagingKeysThenRemovesExpiredPreviewRecord() {
         SkillSuiteBundlePreviewSession preview = preview();
         preview.markExpired();

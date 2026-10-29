@@ -233,9 +233,10 @@ public class MySkillAppService {
     }
 
     private Page<Skill> page(List<Skill> skills, int page, int size) {
-        int fromIndex = Math.min(page * size, skills.size());
-        int toIndex = Math.min(fromIndex + size, skills.size());
-        return new PageImpl<>(skills.subList(fromIndex, toIndex), PageRequest.of(page, size), skills.size());
+        PageRequest pageable = PageRequest.of(page, size);
+        int fromIndex = (int) Math.min(pageable.getOffset(), skills.size());
+        int toIndex = (int) Math.min((long) fromIndex + size, skills.size());
+        return new PageImpl<>(skills.subList(fromIndex, toIndex), pageable, skills.size());
     }
 
     private boolean matchesNamespace(Skill skill, Long namespaceId) {

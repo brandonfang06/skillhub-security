@@ -69,6 +69,18 @@ class CliSkillAppServiceTest {
     }
 
     @Test
+    void lastRepresentablePageDoesNotReturnNegativeCursor() {
+        given(skillQueryService.listInstallableSkillsByNamespace(eq("global"), eq("user"), eq(Map.of()),
+            eq(PageRequest.of(Integer.MAX_VALUE, 10))))
+            .willReturn(org.springframework.data.domain.Page.empty(PageRequest.of(Integer.MAX_VALUE, 10)));
+
+        var response = service.listNamespaceSkills("global", Integer.MAX_VALUE, 10, "user", Map.of());
+
+        assertNull(response.nextCursor());
+        assertTrue(response.items().isEmpty());
+    }
+
+    @Test
     void search_mapsResultsToCliFormat() {
         var searchResponse = new SkillSearchAppService.SearchResponse(
                 List.of(new SkillSummaryResponse(

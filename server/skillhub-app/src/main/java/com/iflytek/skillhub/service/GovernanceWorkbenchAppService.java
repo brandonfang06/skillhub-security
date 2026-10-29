@@ -1,6 +1,7 @@
 package com.iflytek.skillhub.service;
 
 import com.iflytek.skillhub.domain.namespace.NamespaceRole;
+import com.iflytek.skillhub.domain.shared.exception.DomainBadRequestException;
 import com.iflytek.skillhub.domain.governance.GovernanceNotificationService;
 import com.iflytek.skillhub.domain.report.SkillReport;
 import com.iflytek.skillhub.domain.report.SkillReportRepository;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 public class GovernanceWorkbenchAppService {
 
     private static final int SUMMARY_PAGE_SIZE = 100;
+    private static final int MAX_INBOX_WINDOW = 10_000;
     private static final Set<String> ACTIVITY_ACTIONS = Set.of(
             "REVIEW_SUBMIT",
             "REVIEW_APPROVE",
@@ -102,7 +104,15 @@ public class GovernanceWorkbenchAppService {
                                                                String type,
                                                                int page,
                                                                int size) {
-        int fetchSize = Math.max((page + 1) * size, size);
+        if (page < 0 || size < 1 || size > SUMMARY_PAGE_SIZE) {
+            throw new DomainBadRequestException("error.pagination.invalid", SUMMARY_PAGE_SIZE);
+        }
+        // Each source materializes the requested prefix before the merged page is sliced.
+        long window = ((long) page + 1) * size;
+        if (window > MAX_INBOX_WINDOW) {
+            throw new DomainBadRequestException("error.pagination.windowExceeded", MAX_INBOX_WINDOW);
+        }
+        int fetchSize = (int) window;
         List<GovernanceInboxItemResponse> items = new ArrayList<>();
         long total = 0;
         boolean includeAll = type == null || type.isBlank();
@@ -131,8 +141,8 @@ public class GovernanceWorkbenchAppService {
                 GovernanceInboxItemResponse::timestamp,
                 Comparator.nullsLast(String::compareTo)
         ).reversed());
-        int fromIndex = Math.min(page * size, items.size());
-        int toIndex = Math.min(fromIndex + size, items.size());
+        int fromIndex = (int) Math.min((long) page * size, items.size());
+        int toIndex = (int) Math.min((long) fromIndex + size, items.size());
         return new PageResponse<>(items.subList(fromIndex, toIndex), total, page, size);
     }
 

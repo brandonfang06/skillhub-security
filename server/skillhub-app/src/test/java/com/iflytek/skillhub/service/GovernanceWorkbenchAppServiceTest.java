@@ -56,6 +56,28 @@ class GovernanceWorkbenchAppServiceTest {
 
     private GovernanceWorkbenchAppService service;
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"-1,20", "0,0", "0,101", "100,100", "2147483647,20"})
+    void rejectsUnboundedInboxPaginationBeforeFetching(int page, int size) {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
+            service.listInbox("user", Map.of(), Set.of(), "REVIEW", page, size))
+            .isInstanceOf(com.iflytek.skillhub.domain.shared.exception.DomainBadRequestException.class);
+        org.mockito.Mockito.verifyNoInteractions(reviewTaskRepository, promotionRequestRepository, skillReportRepository);
+    }
+
+    @Test
+    void allowsLastBoundedInboxPage() {
+        when(reviewTaskRepository.findByStatus(ReviewTaskStatus.PENDING, PageRequest.of(0, 10_000)))
+                .thenReturn(org.springframework.data.domain.Page.empty());
+        when(governanceQueryRepository.getReviewInboxItems(List.of())).thenReturn(List.of());
+
+        var result = service.listInbox("admin", Map.of(), Set.of("SKILL_ADMIN"), "REVIEW", 99, 100);
+
+        assertThat(result.items()).isEmpty();
+        org.mockito.Mockito.verify(reviewTaskRepository)
+                .findByStatus(ReviewTaskStatus.PENDING, PageRequest.of(0, 10_000));
+    }
+
     @BeforeEach
     void setUp() {
         service = new GovernanceWorkbenchAppService(

@@ -34,6 +34,16 @@ class AdminAuditLogAppServiceTest {
     }
 
     @Test
+    void largePageUsesLongDatabaseOffset() {
+        when(jdbcTemplate.queryForObject(anyString(), any(MapSqlParameterSource.class), eq(Long.class))).thenReturn(0L);
+        service.listAuditLogs(Integer.MAX_VALUE, 20, null, null, null, null, null, null, null, null);
+
+        var parameters = ArgumentCaptor.forClass(MapSqlParameterSource.class);
+        verify(jdbcTemplate).queryForObject(anyString(), parameters.capture(), eq(Long.class));
+        assertThat(((Number) parameters.getValue().getValue("offset")).longValue()).isEqualTo(42_949_672_940L);
+    }
+
+    @Test
     void listAuditLogs_returnsJdbcBackedPage() {
         when(jdbcTemplate.queryForObject(contains("COUNT(*)"), any(MapSqlParameterSource.class), eq(Long.class)))
                 .thenReturn(1L);

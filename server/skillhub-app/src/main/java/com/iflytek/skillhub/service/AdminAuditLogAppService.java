@@ -62,7 +62,7 @@ public class AdminAuditLogAppService {
                                                                      Instant endTime) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("limit", size)
-                .addValue("offset", Math.max(page, 0) * size);
+                .addValue("offset", Math.max((long) page, 0) * size);
 
         String whereClause = buildWhereClause(
                 parameters,

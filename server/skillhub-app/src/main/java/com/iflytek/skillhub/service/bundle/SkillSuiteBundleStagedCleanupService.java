@@ -77,8 +77,8 @@ public class SkillSuiteBundleStagedCleanupService {
             preview.markStagedCleanupFailed("STORAGE_DELETE_FAILED", now);
             previewRepository.save(preview);
             previewRepository.flush();
-            log.warn("Failed to clean expired Suite Bundle preview staging [previewToken={}]",
-                    previewToken, exception);
+            log.warn("Failed to clean expired Suite Bundle preview staging [errorType={}]",
+                    exception.getClass().getSimpleName());
         }
     }
 
@@ -107,8 +107,8 @@ public class SkillSuiteBundleStagedCleanupService {
             operation.markStagedCleanupFailed("STORAGE_DELETE_FAILED", now);
             operationRepository.save(operation);
             operationRepository.flush();
-            log.warn("Failed to clean terminal Suite Bundle operation staging [operationId={}]",
-                    operationId, exception);
+            log.warn("Failed to clean terminal Suite Bundle operation staging [operationId={}, errorType={}]",
+                    operationId, exception.getClass().getSimpleName());
         }
     }
 

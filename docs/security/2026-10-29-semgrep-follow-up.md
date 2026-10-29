@@ -14,7 +14,7 @@ policy. The unfiltered local public-rule report retained four WARNING findings
 and documented taint fixpoint diagnostic limits. Dependency CVE results and
 source findings are separate acceptance evidence.
 
-Investigation: GitHub's code-scanning endpoint currently returns no analysis
+At the start of this investigation, GitHub's code-scanning endpoint returned no analysis
 for this repository. Existing local scan artifacts and Semgrep/SARIF-named
 Downloads files do not contain the reported 31-result export. No specific cause,
 false-positive classification, or resolution is established.
@@ -80,3 +80,75 @@ The user clarified that the inaccessible 31 findings are believed to be mainly
 backend issues. Java source data-flow review and CodeQL are the current priority.
 Neither the counts above nor tool severity names establish equivalence to those
 31 findings or prove that organization-policy acceptance has passed.
+
+## Backend data-flow follow-up
+
+CodeQL security-extended at `5a28735e1e0f0e84842ef273a79239265f6d9ace`
+completed successfully for both languages ([run 40896403369](https://github.com/brandonfang06/skillhub-security/actions/runs/40896403369)).
+Java produced 53 findings; JavaScript produced 17 (none under `web/src`).
+No result had a CodeQL security-severity of 9.0 or greater. This is CodeQL's
+classification, not evidence about the organization's Semgrep policy.
+
+Concrete backend defects reproduced before changes:
+
+- Large page numbers overflowed integer arithmetic in audit-log SQL offsets,
+  filtered skill-list slicing, governance inbox aggregation and CLI next cursors.
+  Offsets and slice arithmetic now use long intermediates; the CLI stops at the
+  largest representable page. Governance inbox rejects invalid page sizes and
+  requested prefixes above 10,000 items before querying its three sources, to
+  bound memory/query amplification. This introduces an intentional HTTP 400 for
+  `(page + 1) * size > 10,000`; each page remains limited to 100 items.
+- Failed staging cleanup wrote a preview capability token and the storage
+  exception to logs. It now records only the exception type; terminal-operation
+  cleanup also omits raw exception contents. Persisted retry/failure evidence is
+  retained. No authentication policy, database schema or cleanup scope changed.
+
+The added adversarial cases produced eight failed assertions and one error
+before fixes (51 total tests), including negative indexes/cursors and a captured
+preview token in the logger. These are confirmed defects; CodeQL classified the
+associated arithmetic/log findings as High, not Critical.
+
+Other Java findings were traced through their context: the disabled-CSRF chain
+requires a dedicated Bearer service token on every request and is stateless;
+legacy MD5 is a compatibility identifier, and SHA-1 is a Git protocol checksum.
+The four user-controlled-bypass reports cover explicit authentication/session
+checks, not independently demonstrated bypasses. The 16 command-path reports
+are in test harnesses. SQL strings flagged by FindSecBugs use constant clauses
+and bound values; no injection was demonstrated. These findings are retained,
+not hidden through inline suppressions or renamed APIs. Lower-severity log and
+lock findings still require normal security maintenance.
+
+Verification commands (run from the stated directory):
+
+```text
+# server (Java 21 Maven container)
+./mvnw -B -pl skillhub-app -am -Dtest=MySkillAppServiceTest,AdminAuditLogAppServiceTest,GovernanceWorkbenchAppServiceTest,CliSkillAppServiceTest,SkillSuiteBundleStagedCleanupServiceTest,GovernanceControllerTest,CliSkillControllerTest,AuditLogControllerTest -Dsurefire.failIfNoSpecifiedTests=false test
+./mvnw -B -pl skillhub-app -am -Dtest=*Security*,*Authorization*,*TokenScope*,OAuthLoginRedirectSupportTest,SkillMetadataParserTest,SkillPackageArchiveExtractorTest -Dsurefire.failIfNoSpecifiedTests=false -DforkCount=2 -DargLine=-Xmx2g test
+# repository root
+python scripts/tests/source-security-gate-test.py
+python scripts/tests/workflow-shell-inputs-test.py
+python scripts/check-source-security.py .tmp/semgrep-expanded-backend-final.json
+# web
+node node_modules/vitest/vitest.mjs run --maxWorkers=4
+node node_modules/typescript/bin/tsc -b
+node node_modules/eslint/bin/eslint.js . --report-unused-disable-directives --max-warnings 0
+node node_modules/vite/bin/vite.js build
+```
+
+Focused backend verification: 76 tests pass, including HTTP 400 for an oversized
+inbox window and acceptance of the last allowed page. Security regression: 242
+tests, zero failures/errors/skips. Frontend: 1,237 tests
+pass, typecheck/lint/production build pass. Gate tests: six pass; actual workflow
+shell-injection scenarios: eight pass. Post-backend Semgrep scan: 2,908 files,
+185 total findings (178 WARNING, five INFO, one MEDIUM, one ERROR); primary-scope
+blocking findings and application analysis errors are zero. The remaining ERROR
+is still the separate DSH HTTP probe. The report retains 36 workflow-template
+parser diagnostics; default file exclusions and non-primary diagnostics remain.
+The successful dependency/source CI run at the preceding commit is
+[40896403022](https://github.com/brandonfang06/skillhub-security/actions/runs/40896403022).
+The backend commit triggers fresh CodeQL and dependency/source checks; their
+artifacts are available in this repository's Actions tab.
+
+Organization acceptance remains unresolved. No company report was requested
+again or transferred. The existing 48-hour release watch now includes this
+expanded source-analysis baseline and the unresolved 31-finding context.
