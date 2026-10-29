@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { common, createLowlight } from 'lowlight'
 
 // Create lowlight instance with common languages
@@ -23,12 +23,12 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
     try {
       if (language && lowlight.registered(language)) {
         const tree = lowlight.highlight(language, code, { prefix: 'hljs-' })
-        return treeToHtml(tree)
+        return renderHighlightedNode(tree)
       }
-      return escapeHtml(code)
+      return code
     } catch (error) {
       console.error('Syntax highlighting failed:', error)
-      return escapeHtml(code)
+      return code
     }
   }, [code, language])
 
@@ -38,10 +38,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
       <div className="my-4 rounded-lg border border-border/60 bg-secondary/30">
         <div className="max-w-full overflow-x-auto rounded-lg bg-background px-4 py-3">
           <pre className="m-0 min-w-max bg-transparent p-0 text-[13px] leading-6">
-            <code
-              className="hljs"
-              dangerouslySetInnerHTML={{ __html: highlightedCode }}
-            />
+            <code className="hljs">{highlightedCode}</code>
           </pre>
         </div>
       </div>
@@ -50,35 +47,22 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
 }
 
 /**
- * Converts lowlight AST tree to HTML string
+ * Keep package source as React text, including inside syntax-highlight spans.
  */
-function treeToHtml(node: HighlightedNode): string {
+function renderHighlightedNode(node: HighlightedNode, key = 0): ReactNode {
   if (node.type === 'text') {
-    return escapeHtml(node.value)
+    return node.value
   }
 
   if (node.type === 'element') {
     const classNames = node.properties?.className
     const className = Array.isArray(classNames) ? classNames.join(' ') : ''
-    const children = node.children.map(treeToHtml).join('')
-    return `<span class="${className}">${children}</span>`
+    return <span key={key} className={className}>{node.children.map(renderHighlightedNode)}</span>
   }
 
   if (node.type === 'root') {
-    return node.children.map(treeToHtml).join('')
+    return node.children.map(renderHighlightedNode)
   }
 
-  return ''
-}
-
-/**
- * Escapes HTML special characters
- */
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
+  return null
 }

@@ -31,6 +31,7 @@ jobs:
 
       - name: Rescore deferred issues
         env:
+          RESCORE_LIMIT: ${{ inputs.limit || '0' }}
           GH_TOKEN: ${{ github.token }}
           ISSUE_TRIAGE_LLM_MODE: ${{ vars.ISSUE_TRIAGE_LLM_MODE }}
           ISSUE_TRIAGE_LLM_BASE_URL: ${{ vars.ISSUE_TRIAGE_LLM_BASE_URL }}
@@ -48,4 +49,4 @@ jobs:
             .github/scripts/issue-backlog-rescore.ts \
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
-            --limit "${{ inputs.limit || '0' }}"
+            --limit "$RESCORE_LIMIT"

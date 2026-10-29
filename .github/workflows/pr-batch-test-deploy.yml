@@ -66,12 +66,15 @@ jobs:
       - name: Merge selected PRs onto base ref
         id: batch
         env:
+          PR_NUMBERS: ${{ inputs.pr_numbers }}
+          BASE_REF: ${{ inputs.base_ref }}
+          DEPLOY_CHANNEL: ${{ inputs.deploy_channel }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           scripts/prepare-pr-batch.sh \
-            --pr-list "${{ inputs.pr_numbers }}" \
-            --base-ref "${{ inputs.base_ref }}" \
-            --deploy-channel "${{ inputs.deploy_channel }}"
+            --pr-list "$PR_NUMBERS" \
+            --base-ref "$BASE_REF" \
+            --deploy-channel "$DEPLOY_CHANNEL"
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6

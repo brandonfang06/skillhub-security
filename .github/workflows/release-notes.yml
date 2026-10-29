@@ -29,6 +29,8 @@ jobs:
 
       - name: Generate release notes
         env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+          PREV: ${{ github.event.inputs.prev_tag }}
           GH_TOKEN: ${{ github.token }}
           RELEASE_NOTES_LLM_BASE_URL: ${{ vars.RELEASE_NOTES_LLM_BASE_URL || 'https://models.inference.ai.azure.com' }}
           RELEASE_NOTES_LLM_API_KEY: ${{ secrets.RELEASE_NOTES_LLM_API_KEY || github.token }}
@@ -37,10 +39,8 @@ jobs:
           ISSUE_TRIAGE_LLM_API_KEY: ${{ secrets.ISSUE_TRIAGE_LLM_API_KEY }}
           ISSUE_TRIAGE_LLM_MODEL: ${{ vars.ISSUE_TRIAGE_LLM_MODEL }}
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          PREV="${{ github.event.inputs.prev_tag }}"
-          ARGS="--owner ${{ github.repository_owner }} --repo ${{ github.event.repository.name }} --tag $TAG"
-          [ -n "$PREV" ] && ARGS="$ARGS --prev-tag $PREV"
+          ARGS=(--owner "$GITHUB_REPOSITORY_OWNER" --repo "${GITHUB_REPOSITORY#*/}" --tag "$TAG")
+          [ -n "$PREV" ] && ARGS+=(--prev-tag "$PREV")
 
           deno run --allow-env --allow-net --allow-run --allow-read \
-            .github/scripts/release-notes.ts $ARGS
+            .github/scripts/release-notes.ts "${ARGS[@]}"

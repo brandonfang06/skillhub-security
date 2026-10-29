@@ -67,6 +67,7 @@ class LocalAuthServiceTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(passwordEncoder.encode(any())).thenReturn("dummy-encoded");
         service = new LocalAuthService(
             credentialRepository,
             userAccountRepository,
@@ -78,6 +79,7 @@ class LocalAuthServiceTest {
             eventPublisher,
             authSettings
         );
+        org.mockito.Mockito.clearInvocations(passwordEncoder);
     }
 
     @Test
@@ -222,9 +224,24 @@ class LocalAuthServiceTest {
     }
 
     @Test
+    void unknownUsernameUsesTheConfiguredPasswordEncodingFormat() {
+        PasswordEncoder configuredEncoder =
+            org.springframework.security.crypto.factory.PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        LocalAuthService configuredService = new LocalAuthService(
+            credentialRepository, userAccountRepository, userRoleBindingRepository,
+            globalNamespaceMembershipService, new PasswordPolicyValidator(), configuredEncoder,
+            CLOCK, eventPublisher, authSettings);
+        given(credentialRepository.findByUsernameIgnoreCase("ghost")).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> configuredService.login("ghost", "bad"))
+            .isInstanceOf(AuthFlowException.class)
+            .extracting("status").isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
     void login_withUnknownUsername_stillPerformsDummyPasswordCheck() {
         given(credentialRepository.findByUsernameIgnoreCase("ghost")).willReturn(Optional.empty());
-        given(passwordEncoder.matches(eq("bad"), eq("$2a$12$8Q/2o2A0V.b18G2DutV4c.s5zZxH6MECM7tP8mYv6b6Q6x6o9v3vu")))
+        given(passwordEncoder.matches(eq("bad"), eq("dummy-encoded")))
             .willReturn(false);
 
         assertThatThrownBy(() -> service.login("ghost", "bad"))
@@ -232,7 +249,7 @@ class LocalAuthServiceTest {
             .extracting("status")
             .isEqualTo(HttpStatus.UNAUTHORIZED);
 
-        verify(passwordEncoder).matches("bad", "$2a$12$8Q/2o2A0V.b18G2DutV4c.s5zZxH6MECM7tP8mYv6b6Q6x6o9v3vu");
+        verify(passwordEncoder).matches("bad", "dummy-encoded");
         verify(userAccountRepository, never()).findById(any());
     }
 

@@ -35,10 +35,7 @@ public class LocalAuthService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final Duration LOCK_DURATION = Duration.ofMinutes(15);
-    // Precomputed BCrypt hash for "skillhub-local-auth-dummy". Used to blur timing
-    // differences between existing and non-existing usernames during login.
-    private static final String DUMMY_PASSWORD_HASH =
-            "$2a$12$8Q/2o2A0V.b18G2DutV4c.s5zZxH6MECM7tP8mYv6b6Q6x6o9v3vu";
+    private final String dummyPasswordHash;
 
     private final LocalCredentialRepository credentialRepository;
     private final UserAccountRepository userAccountRepository;
@@ -65,6 +62,8 @@ public class LocalAuthService {
         this.globalNamespaceMembershipService = globalNamespaceMembershipService;
         this.passwordPolicyValidator = passwordPolicyValidator;
         this.passwordEncoder = passwordEncoder;
+        // Missing accounts must use the same encoder and cost as real accounts.
+        this.dummyPasswordHash = passwordEncoder.encode(UUID.randomUUID().toString());
         this.clock = clock;
         this.eventPublisher = eventPublisher;
         this.authSettings = authSettings;
@@ -127,7 +126,7 @@ public class LocalAuthService {
             .orElse(null);
 
         if (credential == null) {
-            passwordEncoder.matches(password == null ? "" : password, DUMMY_PASSWORD_HASH);
+            passwordEncoder.matches(password == null ? "" : password, dummyPasswordHash);
             throw invalidCredentials();
         }
 

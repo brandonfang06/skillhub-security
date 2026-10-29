@@ -42,6 +42,7 @@ jobs:
 
       - name: Run triage
         env:
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
           GH_TOKEN: ${{ github.token }}
           ISSUE_TRIAGE_LLM_MODE: ${{ vars.ISSUE_TRIAGE_LLM_MODE }}
           ISSUE_TRIAGE_LLM_BASE_URL: ${{ vars.ISSUE_TRIAGE_LLM_BASE_URL }}
@@ -59,4 +60,4 @@ jobs:
             .github/scripts/issue-triage.ts \
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
-            --issue-number "${{ github.event.issue.number || inputs.issue_number }}"
+            --issue-number "$ISSUE_NUMBER"

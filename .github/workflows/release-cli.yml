@@ -34,9 +34,9 @@ jobs:
 
       - name: Validate tag (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ github.event.inputs.tag }}
         run: |
-          TAG="${{ github.event.inputs.tag }}"
-
           # Verify tag exists
           if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
             echo "ERROR: Tag '$TAG' does not exist in the repository" >&2
@@ -66,8 +66,9 @@ jobs:
       - name: Extract version from tag
         id: extract
         working-directory: cli
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
           if [[ ! "$TAG" =~ ^cli-v([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)$ ]]; then
             echo "Invalid tag format: $TAG (expected cli-vX.Y.Z)"
             exit 1
@@ -259,9 +260,9 @@ jobs:
 
       - name: Create GitHub Release
         env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
           VERSION="${{ needs.build-and-test.outputs.version }}"
           PACKAGE_NAME="${{ needs.build-and-test.outputs.package_name }}"
 

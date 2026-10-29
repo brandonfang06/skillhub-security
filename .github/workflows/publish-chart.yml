@@ -49,15 +49,17 @@ jobs:
 
       - name: Parse version from tag
         id: ver
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VER="${{ inputs.version }}"
-          elif [[ "${{ github.ref_name }}" =~ ^(helm|chart)-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            VER="$INPUT_VERSION"
+          elif [[ "$GITHUB_REF_NAME" =~ ^(helm|chart)-v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             VER="${BASH_REMATCH[2]}"
-          elif [[ "${{ github.ref_name }}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+          elif [[ "$GITHUB_REF_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             VER="${BASH_REMATCH[1]}"
           else
-            echo "ERROR: Unsupported release tag: ${{ github.ref_name }}"
+            echo "ERROR: Unsupported release tag: $GITHUB_REF_NAME"
             exit 1
           fi
           if [[ ! "$VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then

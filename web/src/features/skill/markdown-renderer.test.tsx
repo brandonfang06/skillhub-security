@@ -142,6 +142,16 @@ describe('MarkdownRenderer Mermaid blocks', () => {
     await waitFor(() => expect(container.querySelector('[data-testid="second-mermaid-svg"]')).toBeTruthy())
   })
 
+  it('sanitizes SVG and embedded HTML before inserting renderer output', async () => {
+    mermaidRender.mockResolvedValue({ svg: '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><a href="javascript:alert(1)"><text>link</text></a><foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><img src="x" onerror="alert(1)" /><span>Diagram label</span></div></foreignObject></svg>' })
+
+    const { container } = render(<MarkdownRenderer content={'```mermaid\nflowchart TD\nA-->B\n```'} />)
+
+    await waitFor(() => expect(container.querySelector('[data-mermaid-diagram] svg')).not.toBeNull())
+    expect(container.querySelector('script, [onload], [onerror], [href^="javascript:"]')).toBeNull()
+    expect(container.textContent).toContain('Diagram label')
+  })
+
   it('keeps ordinary fenced code in the existing preformatted container', () => {
     const { container } = render(
       <MarkdownRenderer content={'```typescript\nconst answer = 42\n```'} />,

@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import ReactMarkdown from 'react-markdown'
+import DOMPurify from 'dompurify'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
@@ -116,7 +117,11 @@ const MermaidBlock = memo(function MermaidBlock({ children }: MermaidBlockProps)
 
   useEffect(() => {
     if (svg && diagramRef.current) {
-      diagramRef.current.innerHTML = svg
+      diagramRef.current.replaceChildren(DOMPurify.sanitize(svg, {
+        ADD_TAGS: ['foreignObject'],
+        HTML_INTEGRATION_POINTS: { foreignobject: true },
+        RETURN_DOM_FRAGMENT: true,
+      }))
     }
   }, [svg])
 
