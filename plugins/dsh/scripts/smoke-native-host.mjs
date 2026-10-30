@@ -125,7 +125,16 @@ export function safeAvailabilityCheckpoint(value) {
   const checkpoints = ['setup', 'install', 'install-poll', 'reference', 'before-digest', 'execute', 'assertion', 'after-digest', 'mutation'];
   const assertions = ['none', 'isError', 'kind', 'schemaVersion', 'association', 'scope', 'integrity', 'discovery', 'name', 'reason', 'invocation', 'installation', 'namespace', 'slug', 'version', 'fingerprint', 'render', 'privacy', 'unchanged', 'accepted', 'completed', 'reference'];
   if (!scenarios.includes(value.scenario) || !checkpoints.includes(value.checkpoint) || !assertions.includes(value.assertion)) return undefined;
-  return { scenario: value.scenario, checkpoint: value.checkpoint, assertion: value.assertion };
+  const result = { scenario: value.scenario, checkpoint: value.checkpoint, assertion: value.assertion };
+  const statuses = ['accepted', 'not-confirmed', 'awaiting-confirmation', 'cancelled'];
+  // Mirror the public installationFailureCodes contract; never forward error messages or IDs.
+  const codes = ['CONTEXT_STALE', 'REQUEST_CONFLICT', 'SOURCE_NOT_CONFIGURED', 'SOURCE_DENIED',
+    'SKILL_UNAVAILABLE', 'RATE_LIMITED', 'SOURCE_UNAVAILABLE', 'TARGET_UNAVAILABLE', 'UNCONFIRMED'];
+  if (statuses.includes(value.install?.status)) {
+    result.install = { status: value.install.status };
+    if (codes.includes(value.install.code)) result.install.code = value.install.code;
+  }
+  return result;
 }
 
 export function safeToggleCheckpoint(value) {
