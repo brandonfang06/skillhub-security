@@ -348,7 +348,8 @@ async function main() {
   try {
     const installStarted = Date.now();
     try {
-      await run('install-host', [npm, 'install', '--timing', '--loglevel=http', '--prefix', root, '--ignore-scripts', '--no-audit', '--no-fund',
+      // Prefer reuse within the original exact/range/peer constraints to reduce duplicate files.
+      await run('install-host', [npm, 'install', '--prefer-dedupe', '--timing', '--loglevel=http', '--prefix', root, '--ignore-scripts', '--no-audit', '--no-fund',
         '--registry=https://registry.npmjs.org', `@deepseek-ai/dsh@${dshVersion}`, `pnpm@${PNPM_VERSION}`], 600000);
     } finally {
       env.npm_config_cache = join(root, 'npm-cache');
