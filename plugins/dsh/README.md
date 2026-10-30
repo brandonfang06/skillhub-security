@@ -12,7 +12,7 @@ SkillHub 的 DSH 原生插件。在 DSH 侧栏打开 **技能中心**，匿名�
 
 `0.5.0` 新增技能卡片及对话中的只读可用性诊断，分别报告文件完整性、宿主发现和调用策略，保留 `0.4.0` 的兼容范围及库存格式。
 
-`0.6.0` 包含受管理技能启停、统一只读检查更新，以及横向已安装卡片和更多菜单。共享库存继续使用 v2，不要求用户同步升级 CLI；兼容修复及真实旧包验收进行中，未通过前阻断发布。公开可用状态以 npm 为准。
+`0.6.1` 包含受管理技能启停、统一只读检查更新，以及横向已安装卡片和更多菜单。共享库存继续使用 v2，不要求用户同步升级 CLI；已通过与 CLI 0.2.0 的真实旧包兼容验收。公开可用状态以 npm 为准。
 
 ## 使用已安装技能
 
@@ -78,8 +78,8 @@ npm pack --ignore-scripts --pack-destination /absolute/path/to/candidate-output
 先查询 npm 上的精确版本，确认可用后安装。核对 DSH、Node 和上表完整 Cordis 组合，停止目标 Web Profile 的 Host，再执行插件安装；也可按下一节安装已验证的本地 tarball：
 
 ```sh
-npm view @astron-team/skillhub-dsh@0.6.0 version
-dsh plugin --profile skillhub-test add @astron-team/skillhub-dsh@0.6.0 --ignore-scripts
+npm view @astron-team/skillhub-dsh@0.6.1 version
+dsh plugin --profile skillhub-test add @astron-team/skillhub-dsh@0.6.1 --ignore-scripts
 dsh --profile skillhub-test --host 127.0.0.1 --port 0 --no-open
 ```
 
@@ -89,7 +89,7 @@ dsh --profile skillhub-test --host 127.0.0.1 --port 0 --no-open
 
 共享库存保持严格 v2，不写入 `installationState`；启停状态从可信的 `SKILL.md` / `SKILL.md.disabled` 入口派生，不要求 CLI 用户同步升级。已发布 CLI `0.2.0` 的正常查询和普通目标管理必须继续兼容；默认更新、同步及 Suite 不得无意重新启用停用目标。旧 CLI 显式 force 重装、更新、同步仍按原覆盖语义执行，可能恢复标准入口；显式 remove 仍可删除，新版重新读取须反映真实变化。
 
-读取 v1/v2 不迁移。未发布构建产生的 v3 必须在身份、入口与未完成事务校验后，同锁保存原字节备份并安全转换为 v2；不能恢复过时备份覆盖新记录。旧 DSH 普通管理日志保持兼容，启停日志隔离影响。兼容修复及真实旧包验收正在进行，未通过前阻断发布。
+读取 v1/v2 不迁移。未发布构建产生的 v3 必须在身份、入口与未完成事务校验后，同锁保存原字节备份并安全转换为 v2；不能恢复过时备份覆盖新记录。旧 DSH 普通管理日志保持兼容，启停日志隔离影响。已通过真实旧包交替操作的兼容验收；公开可用状态以 npm 为准。
 
 案例由作者随技能包提供固定文件 `.skillhub/examples.json`，安装后保持相同位置，跟随技能版本和指纹，不创建另一个全局案例副本。无案例时使用自定义任务；无效声明按普通文件保留，不提供错误的案例入口。
 
@@ -228,7 +228,7 @@ dsh plugin --profile skillhub-test remove @astron-team/skillhub-dsh
 诊断分别核验本地文件、当前会话加载结果，以及用户/模型调用策略。同名技能生效、本地修改和宿主无法核验会给出不同结论。按技能名查询只说明当前宿主观察到的事实，不证明安装来源或内容完整性。检查不会修改、卸载、启停技能或发送消息；历史结果不保证下一次调用仍然可用。
 
 
-## 受管理技能启停（0.6.0）
+## 受管理技能启停（0.6.1）
 
 在“管理安装”中，对明确位置选择“停用”或“启用”。用户级和项目级副本独立管理；停用用户副本不会关闭项目副本。页面与对话均需真实用户确认，取消不写文件。对话工具 `astron_skillhub_disable` / `astron_skillhub_enable` 使用新查询中的位置引用，不能提交自由路径。
 

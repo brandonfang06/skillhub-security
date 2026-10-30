@@ -12,7 +12,7 @@ Version `0.4.0` uses the independent `dsh-v0.4.0` tag. It adds versioned example
 
 `0.5.0` adds read-only skill availability diagnosis in installed cards and conversations, with separate integrity, discovery and invocation-policy results. It retains the compatibility and inventory format of `0.4.0`.
 
-`0.6.0` includes managed enable/disable, unified read-only update checks, and compact horizontal installed cards with a More menu. Shared inventory remains v2 without a coordinated CLI upgrade. Compatibility fixes and real historical-package acceptance are in progress; release remains blocked until they pass. Check npm for public availability.
+`0.6.1` includes managed enable/disable, unified read-only update checks, and compact horizontal installed cards with a More menu. Shared inventory remains v2 without a coordinated CLI upgrade. Compatibility acceptance with the actual CLI 0.2.0 package has passed. Check npm for public availability.
 
 ## Use an installed skill
 
@@ -78,8 +78,8 @@ Published `0.1.0` still requires the original Cordis `4.0.4` baseline and does n
 Query the exact npm version first and install only after confirming availability. Check DSH, Node and a complete Cordis combination listed above, stop the target Web Profile Host, then install the plugin. A verified local tarball can also be installed using the next section:
 
 ```sh
-npm view @astron-team/skillhub-dsh@0.6.0 version
-dsh plugin --profile skillhub-test add @astron-team/skillhub-dsh@0.6.0 --ignore-scripts
+npm view @astron-team/skillhub-dsh@0.6.1 version
+dsh plugin --profile skillhub-test add @astron-team/skillhub-dsh@0.6.1 --ignore-scripts
 dsh --profile skillhub-test --host 127.0.0.1 --port 0 --no-open
 ```
 
@@ -89,7 +89,7 @@ Replace `skillhub-test` with the intended Web Profile; initial creation is docum
 
 Shared inventory remains strict v2 without a persisted `installationState`; activation is derived from trusted `SKILL.md` / `SKILL.md.disabled` entries. A coordinated CLI upgrade is not required. Published CLI `0.2.0` must retain normal queries and ordinary-target management; default update, sync and Suite paths must not unintentionally enable disabled targets. Historical explicit force install, upgrade and sync retain their overwrite semantics and may restore the standard entry; explicit remove retains deletion semantics. New readers must reflect these actual file changes.
 
-Reading v1/v2 does not migrate it. Any v3 inventory from unpublished builds requires identity, entry and pending-transaction validation, an original-byte backup under the same lock, and safe conversion to v2. Never restore a stale backup over newer records. Ordinary journals remain readable by historical DSH; toggle journals isolate compatibility impact. Compatibility implementation and real historical-package acceptance are in progress; release remains blocked until they pass.
+Reading v1/v2 does not migrate it. Any v3 inventory from unpublished builds requires identity, entry and pending-transaction validation, an original-byte backup under the same lock, and safe conversion to v2. Never restore a stale backup over newer records. Ordinary journals remain readable by historical DSH; toggle journals isolate compatibility impact. Compatibility acceptance using alternating operations with actual historical packages has passed; check npm for public availability.
 
 Authors provide examples at the fixed `.skillhub/examples.json` path inside each skill package. The file keeps its location after installation and follows the skill's version and fingerprint; no separate global example copy is created. Skills without examples use a custom task; invalid declarations remain ordinary files without exposing invalid examples.
 
@@ -223,7 +223,7 @@ Choose “管理安装 → 检查可用性” on a conversational installed-skil
 The result distinguishes local integrity, current-session discovery, and user/model invocation policies. Shadowing, local modifications and unknown Host state are separate outcomes. A name-only lookup reports Host observations without proving installation ownership or integrity. Diagnosis never modifies, removes or enables/disables a skill, edits a draft, or sends a message. A historical result is not a guarantee about a later invocation.
 
 
-## Managed skill enable/disable (0.6.0)
+## Managed skill enable/disable (0.6.1)
 
 Open “管理安装” and choose enable or disable on the explicit location row. User and project copies are independent: disabling the user copy does not disable a project copy. UI and conversation mutations require real human confirmation. `astron_skillhub_disable` / `astron_skillhub_enable` accept fresh installation references, never arbitrary paths.
 
