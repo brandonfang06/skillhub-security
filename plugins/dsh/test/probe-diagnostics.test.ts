@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { installationFailureCodes } from '../src/host/installation-failure';
+import { installationFailureCodes } from '../src/host/installation-failure.js';
 // @ts-expect-error The development-only Node entry has no TypeScript declarations.
 import { safeProbeFailure } from '../scripts/smoke-native-host.mjs';
 
