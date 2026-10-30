@@ -573,3 +573,8 @@ DSH 0.6.0 发布检查在 Windows / DSH 0.2.1-rc.2 的 `install-host` 阶段两�
 真实 Windows Node 24.2.0 / npm 11.3.0 的新版 Host lock-only 对照确认：默认 687 个安装位置、51 份 Zod，prefer-dedupe 为 636 个安装位置、1 份 Zod。本机两次完整冷安装仍达到 600 秒上限；减少重复依赖并不证明冷安装超时已解决。
 
 候选提交 `74e6d93b7` 的 [CI 40996963179](https://github.com/iflytek/skillhub/actions/runs/40996963179) 中，旧版 Host 的 Windows Node 24.2.0 完整探针通过，准备耗时 348647ms；Windows Node 24 的准备完成（459541ms），但随后技能可用性探针在 user-install 的 accepted 断言失败。Linux/macOS 基础检查通过，后续官方 Host 和启停矩阵因前置失败未执行，不能算通过。安装工具返回状态与固定失败码需要补充诊断；保留现有断言。最终发布包验收仍待完成。修改验收脚本不等于改变已发布 CLI 或 DSH 产品运行逻辑。
+
+
+后续固定提交 `a431833b33bcf7523949537c50b9409c00c70ce3` 的 [CI 41011761831](https://github.com/iflytek/skillhub/actions/runs/41011761831) 已通过全部 14 项 DSH 检查。Windows / Host 0.2.1-rc.2 的启停与关闭监听场景准备分别耗时 348044ms、295943ms；Host 0.2.0-rc.2 分别为 291219ms、322063ms，均在全新 Profile 中通过真实探针。此前安装接受断言失败本轮未复现；新增诊断保留其固定状态和错误码，不修改断言。
+
+本机部分缓存复测仍在 600787ms 超时，因此上述结果证明该固定提交的 CI 矩阵通过，不保证所有 Windows 环境在 600 秒内完成。旧 `dsh-v0.6.0` 标签保持不变；后续发布候选调整为 DSH 0.6.1，使用独立新标签。CLI 0.3.0 已发布，不重复发布，也不发布 SkillHub 应用 Release。0.6.1 发布身份、安装包及公开 npm 验收按发布流程单独验证。
