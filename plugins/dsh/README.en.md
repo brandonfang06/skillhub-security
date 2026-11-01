@@ -12,11 +12,13 @@ Version `0.4.0` uses the independent `dsh-v0.4.0` tag. It adds versioned example
 
 `0.5.0` adds read-only skill availability diagnosis in installed cards and conversations, with separate integrity, discovery and invocation-policy results. It retains the compatibility and inventory format of `0.4.0`.
 
+`0.6.1` includes managed enable/disable, unified read-only update checks, and compact horizontal installed cards with a More menu. Shared inventory remains v2 without a coordinated CLI upgrade. Compatibility acceptance with the actual CLI 0.2.0 package has passed. Check npm for public availability.
+
 ## Use an installed skill
 
 Market, installed and everyday conversation lists show one card per skill. “使用技能” asks the Host to verify the unique installation actually usable in the current session. Catalog use creates a conversation in the same workspace; conversation use keeps the current session. Choose an example or custom task to insert an editable draft. This never sends a message, invokes a model or overwrites the original draft.
 
-“管理安装” opens skill details, where the inline installation panel shows each location’s version, state and explicit use/update/enable/disable/removal actions. Disabled or unverified skills lead to management. Installation scope remains in advanced confirmation options, with the current-user default unchanged.
+In the installed card’s More menu, “管理安装” opens skill details, where the inline installation panel shows each location’s version, state and explicit use/update/enable/disable/removal actions. Disabled or unverified skills lead to management. Installation scope remains in advanced confirmation options, with the current-user default unchanged.
 
 An active session is required. Shadowed skills, modified files, disabled user invocation or changed context are reported without modifying the draft. Historical receipts are not proof of current installation. This feature is available from `0.4.0`.
 
@@ -76,8 +78,8 @@ Published `0.1.0` still requires the original Cordis `4.0.4` baseline and does n
 Query the exact npm version first and install only after confirming availability. Check DSH, Node and a complete Cordis combination listed above, stop the target Web Profile Host, then install the plugin. A verified local tarball can also be installed using the next section:
 
 ```sh
-npm view @astron-team/skillhub-dsh@0.5.0 version
-dsh plugin --profile skillhub-test add @astron-team/skillhub-dsh@0.5.0 --ignore-scripts
+npm view @astron-team/skillhub-dsh@0.6.1 version
+dsh plugin --profile skillhub-test add @astron-team/skillhub-dsh@0.6.1 --ignore-scripts
 dsh --profile skillhub-test --host 127.0.0.1 --port 0 --no-open
 ```
 
@@ -85,9 +87,9 @@ Replace `skillhub-test` with the intended Web Profile; initial creation is docum
 
 ## Upgrade from an older version
 
-`0.4.0` uses inventory schema v2 with per-location versions. The installation core remains bundled, so a separate CLI is unnecessary. If the same user also manages these skills through SkillHub CLI, upgrade every such CLI to `0.2.0` before upgrading the plugin and stop scheduled/background writes from old clients. Confirm availability with `npm view @astron-team/skillhub@0.2.0 version`, then run `npm install -g @astron-team/skillhub@0.2.0`, verify `skillhub version`, then install the exact plugin version above.
+Shared inventory remains strict v2 without a persisted `installationState`; activation is derived from trusted `SKILL.md` / `SKILL.md.disabled` entries. A coordinated CLI upgrade is not required. Published CLI `0.2.0` must retain normal queries and ordinary-target management; default update, sync and Suite paths must not unintentionally enable disabled targets. Historical explicit force install, upgrade and sync retain their overwrite semantics and may restore the standard entry; explicit remove retains deletion semantics. New readers must reflect these actual file changes.
 
-Reading v1 inventory does not migrate it. Before the first v2 write, a byte-verified `inventory.v1.<sha256>.backup.json` is retained beside the inventory. User and project copies may retain different versions. Old CLI/v2 inventory mixed writes are unsupported. Once locations have changed independently, restoring the old inventory or downgrading the plugin alone is not a rollback: skill files, installation metadata and operation records must also be reconciled.
+Reading v1/v2 does not migrate it. Any v3 inventory from unpublished builds requires identity, entry and pending-transaction validation, an original-byte backup under the same lock, and safe conversion to v2. Never restore a stale backup over newer records. Ordinary journals remain readable by historical DSH; toggle journals isolate compatibility impact. Compatibility acceptance using alternating operations with actual historical packages has passed; check npm for public availability.
 
 Authors provide examples at the fixed `.skillhub/examples.json` path inside each skill package. The file keeps its location after installation and follows the skill's version and fingerprint; no separate global example copy is created. Skills without examples use a custom task; invalid declarations remain ordinary files without exposing invalid examples.
 
@@ -138,7 +140,7 @@ Each visibility setting accepts `auto`, `show` or `hide`. Auto detects actual an
 
 - Browse supports search, server sorting, real labels and explicit **Load more**, normally 12 results per page. A first-page 404/405 can fall back to bounded legacy search, with an explicit pagination/sorting limitation. A failed label filter never silently returns unfiltered results.
 - Details show fixed-version documentation and optional tabs. Select a downloadable version before confirming installation. Existing-target protection remains; skill downgrades are not supported.
-- Installed skills are grouped by identity and support keyword filtering. Open “管理安装” for independent location rows and precise confirmed operations; missing directories retain stale-record cleanup.
+- Installed skills are grouped by identity and support keyword filtering. Compact horizontal cards use two columns on desktop and one on narrow screens. Click a card to open details; usable skills keep the primary use action. The more menu opens installation management or checks only this skill’s installation locations without applying updates. Cards show locally installed names, one-line summaries and actual installed versions, marking differing copies as multiple versions. Up to two semantic badges show disabled/unverified installation and update status (blue for updates, gray for disabled, amber for warnings), without a redundant installed label. Details provide independent location rows and precise confirmed operations; missing directories retain stale-record cleanup.
 - `astron_skillhub_search` only searches. Result cards provide a detail action; the drawer offers explicit installation confirmation.
 - An explicit request to install a uniquely selected result does not require opening the drawer first. `astron_skillhub_install` verifies the search-time version and content snapshot. It accepts a `selectionRef` or a full coordinate, exclusively, and a `user`/`project` scope. Expired or ambiguous references are rejected without switching to current latest.
 
@@ -211,7 +213,7 @@ Version selection is read-only. A verifiable newer selected version offers an ex
 
 `astron_skillhub_list_installed` lists current-source managed records in the current user/project roots, not every skill on the machine. `astron_skillhub_check_update` checks the latest or an explicitly requested newer version. `astron_skillhub_upgrade` and `astron_skillhub_uninstall` require an exact installed reference and real human confirmation, including explicitly selected scopes. Without a native question provider they return a confirmation card. Models cannot authorize operations using paths, plan IDs or confirmation flags. `astron_skillhub_operation` reads the original session-owned receipt without resubmitting a mutation.
 
-New conversational installs default to user scope after an explicit install request. Project installation is explicit/advanced. Updating one location preserves other locations' versions. Local edits and stale references block mutations. CLI installations sharing this inventory must be upgraded together; old CLI/new inventory mixed writes are unsupported.
+New conversational installs default to user scope after an explicit install request. Project installation is explicit/advanced. Updating one location preserves other locations' versions. Local edits and stale references block mutations. Shared inventory remains compatible with published CLI 0.2.0; historical explicit overwrite and removal retain their original semantics.
 
 
 ### Skill availability diagnosis (0.5.0)
@@ -221,7 +223,7 @@ Choose “管理安装 → 检查可用性” on a conversational installed-skil
 The result distinguishes local integrity, current-session discovery, and user/model invocation policies. Shadowing, local modifications and unknown Host state are separate outcomes. A name-only lookup reports Host observations without proving installation ownership or integrity. Diagnosis never modifies, removes or enables/disables a skill, edits a draft, or sends a message. A historical result is not a guarantee about a later invocation.
 
 
-## Managed skill enable/disable (unreleased increment)
+## Managed skill enable/disable (0.6.1)
 
 Open “管理安装” and choose enable or disable on the explicit location row. User and project copies are independent: disabling the user copy does not disable a project copy. UI and conversation mutations require real human confirmation. `astron_skillhub_disable` / `astron_skillhub_enable` accept fresh installation references, never arbitrary paths.
 
@@ -229,7 +231,7 @@ Disabling changes only the entry from `SKILL.md` to `SKILL.md.disabled`, keeping
 
 This does not revoke loaded conversation content or stop tasks. Another same-named installation can remain available. Unverified Host cache observations remain unknown; the older RC may need a new session to observe a fallback copy. Removing this plugin does not enable its disabled installations.
 
-The increment writes inventory v3 with per-location `installationState`. Reading v1/v2 is non-mutating; migration preserves the original bytes and a digest-addressed backup. The plugin bundles its compatible core and does not invoke an external CLI. Stop old writers and use the matching compatible CLI build before sharing inventory: published CLI `0.2.0` and `0.1.12` are incompatible. Release versions and order are not assigned yet. An old inventory backup alone is not a downgrade procedure. Native Windows/macOS entry conversion still requires acceptance before release.
+Protocol and real historical-package interoperability remain release gates; see above.
 
 The detail-header website link uses only the detail API’s optional `webUrl`. Missing, null, blank or unsafe values hide the action without breaking skill details or installation. There is no plugin website setting, route construction or Registry fallback; legacy `websiteUrl` settings are ignored. The open-source server uses its trusted `SKILLHUB_PUBLIC_BASE_URL` to supply an absolute link, or null when no valid website base is configured. SaaS must provide this additive API field separately.
 
@@ -238,3 +240,5 @@ Installation locations in the detail view expose secondary actions through a Mor
 Detail installation checks use a dismissible top-right notification. Ordinary success expires after five seconds; conflicts and failures remain dismissible. Repeated checks replace the notification, and leaving the skill clears it. Upgrade candidates and safety blocks stay in the installation row.
 
 Check notifications use a scope/version heading and one concise conclusion. Installation scope is directly visible without an advanced disclosure. Confirmation, progress and completion share a stable two-column layout (stacked on narrow screens), with a separate use action after completion. Default scope selection is unchanged.
+
+The installed page supports an explicit update check with up to three concurrent read-only requests and a 30-second timeout per installation. Progress, distinct upgradable skill counts, failed installation counts, filters, and failed-only retry are shown progressively. Opening details or leaving the list cancels pending checks; returning from details retains valid completed results. Source, session, workspace, or installation-reference changes invalidate old results. Details show checked target versions per location; execution still revalidates the target. Updates still require confirmation for the exact installation in details.

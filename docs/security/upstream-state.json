@@ -3,8 +3,24 @@
   "upstream": "iflytek/skillhub",
   "destination": "brandonfang06/skillhub-security",
   "branch": "dev",
-  "upstreamBaseCommit": "9ebb99226dd1b3e1d4fd8dd3e36baae70a4ed273",
+  "upstreamBaseCommit": "326cbd62244aac7dbd7a97a136148231d6a46ce6",
   "coveredReleases": [
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.25",
+      "prerelease": false,
+      "published_at": "2026-10-30T10:01:42Z",
+      "tag_name": "v0.2.25",
+      "commit": "326cbd62244aac7dbd7a97a136148231d6a46ce6"
+    },
+    {
+      "draft": false,
+      "html_url": "https://github.com/iflytek/skillhub/releases/tag/cli-v0.3.0",
+      "prerelease": false,
+      "published_at": "2026-10-30T02:17:59Z",
+      "tag_name": "cli-v0.3.0",
+      "commit": "6c276d38fc770deedd881d26b0e2e11798cb332a"
+    },
     {
       "draft": false,
       "html_url": "https://github.com/iflytek/skillhub/releases/tag/v0.2.24",
@@ -166,8 +182,8 @@
       "commit": "dc185861d4bbc98f1a485e2ddbb5e9199065319f"
     }
   ],
-  "securityReport": "docs/security-remediation-2026-10-28.md",
-  "criticalGate": "all three built runtime images, including unfixed Critical findings",
+  "securityReport": "docs/security/2026-11-01-v0.2.25-intake.md",
+  "criticalGate": "production Java/frontend source and actual JAR/frontend dependencies, including unfixed Critical findings; container OS and CLI/DSH are supplemental",
   "monitor": "SkillHub upstream release watch",
   "monitorIntervalHours": 48
 }

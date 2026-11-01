@@ -26,7 +26,7 @@ export interface InstalledProjectionItem {
   fingerprint?: string
   /** Internal digest of this exact target's release, timestamp and ownership. */
   recordRevision?: string
-  installationState: InstallationState
+  installationState?: InstallationState
   state: 'present' | 'missing' | 'metadata-invalid' | 'mismatch' | 'unreadable'
 }
 export interface InstalledProjection {
@@ -81,6 +81,7 @@ export interface NativeRuntime {
   acceptUpgrade(request: NativeOperationRequest, validateNew: () => Promise<NativeInstallAcceptance>): Promise<NativeOperation | undefined>
   inspectUpgrade(selected: UpgradeSelection, targets: readonly InstalledProjectionTarget[]): Promise<UpgradeBaseline>
   assessUpdate(installed: UpdateIdentity, candidate: UpdateIdentity): UpdateAssessment
+  openInstalledSnapshot(registry: string, targets: readonly InstalledProjectionTarget[]): Promise<{ projection: InstalledProjection; read(item: InstalledProjectionItem): Promise<InstalledProjectionItem> }>
   listInstalled(registry: string, targets: readonly InstalledProjectionTarget[]): Promise<InstalledProjection>
   readonly hostInstanceId: string
   listPending(): Promise<NativePendingOperation[]>

@@ -5,7 +5,7 @@ import { isDeepStrictEqual } from 'node:util'
 import { inspectToggle, executeNativeToggle, recoverToggle } from './native-toggle'
 import { readSkillExamples } from '../services/skill-examples'
 import { observeInstallationDiscovery } from './install-discovery'
-import { readInstalledProjection } from './installed-projection'
+import { readInstalledProjection, openInstalledProjectionSnapshot } from './installed-projection'
 import { assessSkillUpdate } from './update-assessment'
 import { inspectUpgradeBaseline } from './upgrade-baseline'
 import { inspectRemovalBaseline } from './removal-baseline'
@@ -25,7 +25,7 @@ export async function openNativeRuntime(options: { stateDirectory: string; inven
   const operations = await OperationStore.open(options.stateDirectory)
   const inventory = new InventoryStore(options.inventoryHome)
   const ensureCompatible = async () => {
-    if ((await operations.listForRecovery()).some(record => record.schemaVersion < 3)) {
+    if (await inventory.diskVersion() === 3 && (await operations.listForRecovery()).length) {
       throw new OperationStoreError('TARGET_RECOVERY_REQUIRED')
     }
     await inventory.ensureWritable()
@@ -115,6 +115,7 @@ export async function openNativeRuntime(options: { stateDirectory: string; inven
     },
     assessUpdate: assessSkillUpdate,
     inspectUpgrade: (selected, targets) => inspectUpgradeBaseline(inventory, { ...selected }, targets.map(target => ({ ...target }))),
+    openInstalledSnapshot: (registry, targets) => openInstalledProjectionSnapshot(inventory, registry, targets),
     listInstalled: (registry, targets) => readInstalledProjection(inventory, registry, targets.map(target => ({ ...target }))),
     executeInstall: async request => {
       await ensureCompatible()

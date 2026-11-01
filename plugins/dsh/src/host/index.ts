@@ -44,6 +44,7 @@ import type { NativeRecoveryResult } from './generated/native-contract.js';
 import type { InstallationTargetList } from './types.js';
 import type { LocalRuntimeStatus } from './local-runtime.js';
 import type { InstalledSkillList, InstalledSkillDetail, InstalledUpdateCheck, SkillUsePreparation, SkillUseSelection } from './types.js';
+import { readInstalledPresentations } from './installed-presentation.js';
 import { installationFailureCode } from './installation-failure.js';
 import type { InstalledProjectionItem } from './generated/native-contract.js';
 
@@ -69,6 +70,10 @@ export class SkillHubService extends TypertRemoteService {
   private readonly upgradePlans = new UpgradePlans();
   private readonly removalPlans = new RemovalPlans();
   private readonly togglePlans = new TogglePlans();
+  private readonly installedUpdateScans = new Map<string, {
+    sourceRevision: string; agentId: string; valid(): void; close(): void;
+    check(key: string, signal: AbortSignal): Promise<InstalledUpdateCheck>;
+  }>();
   private readonly installedReferenceKey = randomBytes(32);
   private readonly capabilities = new Map<string, ModuleAvailability>();
   private readonly details = new Map<string, {
@@ -105,7 +110,7 @@ export class SkillHubService extends TypertRemoteService {
       ctx.effect(() => registerSearchTool(ctx.tools, (query, context, signal) => this.searchConversation(query, context, signal)));
       ctx.effect(() => registerInstallTool(ctx.tools, (request, context, signal) => this.installConversationWithChoice(request, context, signal)));
     });
-    ctx.effect(() => () => { this.lifetime.abort(); this.pendingConversationInstalls.clear(); this.pendingConversationChoices.clear(); this.managementRequests.clear(); this.managementConfirmations.clear(); this.details.clear(); this.capabilities.clear(); this.selections.clear(); this.installationTargets.clear(); this.upgradePlans.clear(); this.removalPlans.clear(); this.togglePlans.clear(); });
+    ctx.effect(() => () => { this.lifetime.abort(); for (const scan of this.installedUpdateScans.values()) scan.close(); this.pendingConversationInstalls.clear(); this.pendingConversationChoices.clear(); this.managementRequests.clear(); this.managementConfirmations.clear(); this.details.clear(); this.capabilities.clear(); this.selections.clear(); this.installationTargets.clear(); this.upgradePlans.clear(); this.removalPlans.clear(); this.togglePlans.clear(); });
   }
 
   /** Internal diagnostics, deliberately not a Remote method. */
@@ -308,6 +313,7 @@ export class SkillHubService extends TypertRemoteService {
     const outcome = await runtime.listInstalled(source.registryUrl, roots).then(
       result => ({ result, error: undefined }), error => ({ result: undefined, error }),
     );
+    const presentation = outcome.result ? await readInstalledPresentations(outcome.result.items, roots, combined) : [];
     combined.throwIfAborted();
     this.assertSource(sourceRevision);
     if (agent.session.header.cwd !== cwd || serviceIdentity(agent.ctx.get('fs')) !== serviceIdentity(fs)
@@ -329,10 +335,10 @@ export class SkillHubService extends TypertRemoteService {
     if (!outcome.result) throw outcome.error;
     const result = outcome.result;
     const unavailable = targets.filter(entry => !entry.target).map(entry => entry.scope);
-    const items = result.items.map(item => {
+    const items = result.items.map((item, index) => {
       const itemKey = this.installedItemKey(agent.session.id, cwd, sourceRevision, item);
       const locationKey = createHmac('sha256', this.installedReferenceKey).update(JSON.stringify([agent.session.id, cwd, sourceRevision, item.namespace, item.slug, item.scope, item.targetPath])).digest('base64url');
-      return { itemKey, locationKey, installationState: item.installationState ?? 'enabled', namespace: item.namespace, slug: item.slug, version: item.version, scope: item.scope, state: item.state };
+      return { ...presentation[index], itemKey, locationKey, installationState: item.installationState, namespace: item.namespace, slug: item.slug, version: item.version, scope: item.scope, state: item.state };
     });
     return { items, complete: result.complete, issues: result.issues, unavailable };
   }
@@ -398,7 +404,7 @@ export class SkillHubService extends TypertRemoteService {
             namespace: selected.item.namespace, slug: selected.item.slug, version: selected.item.version }, target);
         } } : undefined });
     valid();
-    return { ...diagnosis, ...(selected ? { installationState: selected.item.installationState ?? 'enabled' } : {}), ...(selected ? { scope: selected.item.scope, installation: { namespace: selected.item.namespace,
+    return { ...diagnosis, ...(selected ? { installationState: selected.item.installationState } : {}), ...(selected ? { scope: selected.item.scope, installation: { namespace: selected.item.namespace,
       slug: selected.item.slug, version: selected.item.version, scope: selected.item.scope } } : {}) };
   }
 
@@ -539,6 +545,127 @@ export class SkillHubService extends TypertRemoteService {
     valid();
     combined.throwIfAborted();
     return { item: { itemKey, namespace: item.namespace, slug: item.slug, version: item.version, scope: item.scope, state: item.state }, content };
+  }
+
+  @RemoteScope('agent')
+  async beginInstalledUpdateScan(sourceRevision: string, signal: AbortSignal): Promise<{ scanId: string; itemKeys: string[] }> {
+    this.assertSource(sourceRevision);
+    const agentId = this.ctx.invocation?.request.args.agentId;
+    const agent = typeof agentId === 'string' ? this.ctx.get('agents')?.get(SessionId(agentId)) : undefined;
+    const runtime = this.localRuntime;
+    const fs = agent?.ctx.get('fs');
+    const cwd = agent?.session.header.cwd;
+    const sessionId = agent?.session.id;
+    const controller = new AbortController();
+    const scanId = randomUUID();
+    const combined = AbortSignal.any([controller.signal, this.lifetime.signal]);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const deadline = Date.now() + 30 * 60_000;
+    let expiresAt = Date.now() + 60_000;
+    const touch = () => {
+      clearTimeout(timer);
+      expiresAt = Math.min(Date.now() + 60_000, deadline);
+      timer = setTimeout(close, Math.max(0, expiresAt - Date.now())); timer.unref();
+    };
+    let initializing = true;
+    const close = () => {
+      controller.abort(); clearTimeout(timer);
+      // Keep the reserved slot until uncancellable filesystem initialization settles.
+      if (!initializing) this.installedUpdateScans.delete(scanId);
+    };
+    const valid = () => {
+      if (Date.now() >= expiresAt) close();
+      combined.throwIfAborted(); this.assertSource(sourceRevision);
+      if (!agent || !runtime || !fs || !cwd || agent.session.id !== sessionId || agent.session.header.cwd !== cwd
+        || this.ctx.get('agents')?.get(SessionId(sessionId!)) !== agent || this.localRuntime !== runtime
+        || serviceIdentity(agent.ctx.get('fs')) !== serviceIdentity(fs)) throw new RemoteError('skillhub/context-stale', 'Update scan context changed.', { retryable: false });
+    };
+    valid(); signal.throwIfAborted();
+    if (this.installedUpdateScans.size >= 4) throw new RemoteError('skillhub/context-stale', 'Too many update scans.', { retryable: false });
+    // Reserve the slot before asynchronous snapshot creation; abandoned begins also expire.
+    this.installedUpdateScans.set(scanId, { sourceRevision, agentId: String(agentId), valid, close,
+      check: async () => { throw new Error('Update scan is initializing'); } });
+    touch();
+    const abort = () => close(); signal.addEventListener('abort', abort, { once: true });
+    try {
+      const roots: Awaited<ReturnType<typeof resolveInstalledPath>>[] = [];
+      for (const scope of ['user', 'project'] as const) {
+        try { roots.push(await resolveInstalledPath({ scope, cwd: cwd!, fs: fs!, signal: combined })); }
+        catch { combined.throwIfAborted(); }
+      }
+      const snapshot = await runtime!.openInstalledSnapshot(this.getContext().registryUrl, roots);
+      valid(); signal.throwIfAborted();
+      const items = new Map(snapshot.projection.items.map(item => [this.installedItemKey(sessionId!, cwd!, sourceRevision, item), item]));
+      const candidates = new Map<string, Promise<Awaited<ReturnType<RegistryAdapter['resolve']>>>>();
+      let resolving = 0;
+      const waiters = new Set<() => void>();
+      const resolveCandidate = async (item: InstalledProjectionItem) => {
+        while (resolving >= 3) {
+          combined.throwIfAborted();
+          await new Promise<void>(done => {
+            const wake = () => { waiters.delete(wake); combined.removeEventListener('abort', wake); done(); };
+            waiters.add(wake); combined.addEventListener('abort', wake, { once: true });
+          });
+        }
+        combined.throwIfAborted(); valid(); resolving++;
+        try { return await this.readSource(sourceRevision, combined, (registry, signal) => registry.resolve(item.namespace, item.slug, undefined, signal)); }
+        finally { resolving--; for (const wake of [...waiters]) wake(); }
+      };
+      const read = async (key: string) => {
+        valid();
+        const item = items.get(key);
+        if (!item) throw new Error('Installed reference is not in this scan');
+        const target = await resolveInstalledPath({ scope: item.scope, cwd: cwd!, fs: fs!, signal: combined });
+        if (join(target.root, item.slug) !== item.targetPath) throw new Error('Installed root changed');
+        const current = await snapshot.read(item); valid(); return current;
+      };
+      this.installedUpdateScans.set(scanId, { sourceRevision, agentId: String(agentId), valid, close,
+        check: async (key, itemSignal) => {
+          try {
+            itemSignal.throwIfAborted(); valid(); touch();
+            const item = await read(key);
+            const base = { currentVersion: item.version, candidateVersion: null, checkedAt: new Date().toISOString() };
+            if (item.state !== 'present') return { ...base, state: 'blocked', reason: 'local-record-unverified' };
+            const identity = JSON.stringify([item.namespace, item.slug]);
+            let candidate = candidates.get(identity);
+            if (!candidate) {
+              candidate = resolveCandidate(item);
+              candidates.set(identity, candidate);
+            }
+            const resolved = await candidate.then(value => ({ value }), error => ({ error }));
+            await read(key); itemSignal.throwIfAborted();
+            if ('error' in resolved) return { ...base, state: 'unavailable', reason: installationFailureCode(resolved.error) };
+            const assessment = await runtime!.assessUpdate(item, resolved.value);
+            valid(); itemSignal.throwIfAborted();
+            return { ...assessment, checkedAt: new Date().toISOString() };
+          } catch (error) {
+            if (itemSignal.aborted) throw error;
+            close();
+            throw new RemoteError('skillhub/context-stale', 'Installed update scan changed or expired.', { retryable: false });
+          }
+        } });
+      return { scanId, itemKeys: [...items.keys()] };
+    } catch (error) { close(); throw error; }
+    finally {
+      initializing = false;
+      signal.removeEventListener('abort', abort);
+      if (controller.signal.aborted) this.installedUpdateScans.delete(scanId);
+    }
+  }
+
+  @RemoteScope('agent')
+  async checkInstalledUpdateScan(sourceRevision: string, scanId: string, itemKey: string, signal: AbortSignal): Promise<InstalledUpdateCheck> {
+    const scan = this.installedUpdateScans.get(scanId);
+    if (!scan || scan.sourceRevision !== sourceRevision || scan.agentId !== this.ctx.invocation?.request.args.agentId) {
+      throw new RemoteError('skillhub/context-stale', 'Update scan expired.', { retryable: false });
+    }
+    return scan.check(itemKey, signal);
+  }
+
+  @RemoteScope('agent')
+  async endInstalledUpdateScan(sourceRevision: string, scanId: string): Promise<void> {
+    const scan = this.installedUpdateScans.get(scanId);
+    if (scan?.sourceRevision === sourceRevision && scan.agentId === this.ctx.invocation?.request.args.agentId) scan.close();
   }
 
   @RemoteScope('agent')
