@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-01",
+  "sourceCommit": "51cf87d0",
+  "semgrepVersion": "1.181.1",
+  "engine": "OSS/CE",
+  "ruleRepository": "semgrep/semgrep-rules",
+  "ruleCommit": "16b9e6d45f10649f6a531ec4838ed9924372c3bc",
+  "ruleDirectory": "java",
+  "applicableRulesFromLog": 123,
+  "scannedBackendFiles": 1429,
+  "expectedProductionJavaFiles": 1283,
+  "missingProductionJavaFiles": 0,
+  "analysisErrors": [],
+  "sha256": "caace8fda3ea59b8a8017b870671ecf94f38cc5fb5d61d0963e91a94120d786e",
+  "findings": [
+    {
+      "rule": "java-rules.lang.security.audit.crypto.use-of-sha1",
+      "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/service/GithubSyncArchiveValidator.java",
+      "line": 396,
+      "severity": "WARNING",
+      "message": "Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Instead, use PBKDF2 for password hashing or SHA256 or SHA512 for other hash function applications."
+    },
+    {
+      "rule": "java-rules.lang.security.audit.crypto.use-of-md5",
+      "path": "server/skillhub-auth/src/main/java/com/iflytek/skillhub/auth/federation/adapter/LegacyOAuthIdentityCoordinate.java",
+      "line": 42,
+      "severity": "WARNING",
+      "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not suitable as a cryptographic signature. Use HMAC instead."
+    },
+    {
+      "rule": "java-rules.lang.security.audit.crypto.gcm-detection",
+      "path": "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/AesGcmGithubCredentialCipher.java",
+      "line": 116,
+      "severity": "INFO",
+      "message": "GCM detected, please check that IV/nonce is not reused, an Initialization Vector (IV) is a nonce used to randomize the encryption, so that even if multiple messages with identical plaintext are encrypted, the generated corresponding ciphertexts are different. Unlike the Key, the IV usually does not need to be secret, rather it is important that it is random and unique. Certain encryption schemes the IV is exchanged in public as part of the ciphertext. Reusing same Initialization Vector with the same Key to encrypt multiple plaintext blocks allows an attacker to compare the ciphertexts and then, with some assumptions on the content of the messages, to gain important information about the data being encrypted."
+    },
+    {
+      "rule": "java-rules.lang.security.audit.crypto.gcm-detection",
+      "path": "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/AesGcmGithubCredentialCipher.java",
+      "line": 117,
+      "severity": "INFO",
+      "message": "GCM detected, please check that IV/nonce is not reused, an Initialization Vector (IV) is a nonce used to randomize the encryption, so that even if multiple messages with identical plaintext are encrypted, the generated corresponding ciphertexts are different. Unlike the Key, the IV usually does not need to be secret, rather it is important that it is random and unique. Certain encryption schemes the IV is exchanged in public as part of the ciphertext. Reusing same Initialization Vector with the same Key to encrypt multiple plaintext blocks allows an attacker to compare the ciphertexts and then, with some assumptions on the content of the messages, to gain important information about the data being encrypted."
+    },
+    {
+      "rule": "java-rules.spring.security.audit.spring-sqli",
+      "path": "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncPathPresenceRepository.java",
+      "line": 80,
+      "severity": "WARNING",
+      "message": "Detected a string argument from a public method contract in a raw SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'."
+    }
+  ],
+  "organizationFindingsStatus": "Not reproduced; no internal acceptance asserted."
+}

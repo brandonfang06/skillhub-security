@@ -97,3 +97,10 @@ Do not commit or log credentials; do not reset data to make verification pass.
 - Only `.trellis/spec/` is shared in Git. Tasks, runtime state and personal Trellis tooling remain local.
 - Execution Skills may help run a workflow; they do not own a second copy of project conventions.
 - Preserve and verify existing task records before authorized cleanup; see [archive requirements](./.trellis/spec/workflow/task-archive.md).
+
+## Security reference repository delivery
+
+For this security reference repository, after each verified update is pushed to
+`dev`, create and push its annotated security tag following
+[Security tags](docs/security/security-tags.md). Preserve the distinction between
+public scanner evidence and the organization's unavailable Semgrep policy.

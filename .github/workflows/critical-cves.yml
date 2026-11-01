@@ -33,11 +33,30 @@ jobs:
           python -m pip install PyYAML==6.0.3
           python scripts/tests/source-security-gate-test.py
           python scripts/tests/workflow-shell-inputs-test.py
+      - name: Check out the pinned official Java audit rules
+        uses: actions/checkout@v4
+        with:
+          repository: semgrep/semgrep-rules
+          ref: 16b9e6d45f10649f6a531ec4838ed9924372c3bc
+          path: .security-rules
+          persist-credentials: false
+      - name: Scan backend with the complete official Java rule tree
+        run: |
+          docker run --name semgrep-java -v "$GITHUB_WORKSPACE:/src:ro" -w /src \
+            semgrep/semgrep@sha256:3db5c7af55eb1f512eac0abf0ab69a97b52c74b5e9a27314c221aee1a78d7ab2 \
+            sh -c 'semgrep scan --oss-only --config /src/.security-rules/java --metrics=off --disable-nosem --no-git-ignore --max-target-bytes 0 --timeout 60 --json --output /tmp/semgrep-java.json server'
+      - name: Collect Java audit report
+        if: always()
+        run: docker cp semgrep-java:/tmp/semgrep-java.json semgrep-java.json
+      - name: Require complete Java source coverage and check findings
+        run: python scripts/check-source-security.py --java-only semgrep-java.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: semgrep-source
-          path: semgrep.json
+          path: |
+            semgrep.json
+            semgrep-java.json
           if-no-files-found: error
 
   dependencies:

@@ -26,6 +26,30 @@ class SourceSecurityGateTest(unittest.TestCase):
     def test_missing_coverage_is_not_success(self):
         self.assertFalse(module.gate({"results": []})["coverage"])
 
+    def test_one_scanned_file_per_directory_does_not_prove_complete_coverage(self):
+        report = self.report("WARNING")
+        expected = report["paths"]["scanned"] + ["server/auth/src/main/java/TokenFilter.java"]
+        result = module.gate(report, expected_paths=expected)
+        self.assertFalse(result["coverage"])
+        self.assertEqual(result["missingFiles"], [expected[-1]])
+
+    def test_complete_manifest_has_no_missing_files(self):
+        report = self.report("WARNING")
+        result = module.gate(report, expected_paths=report["paths"]["scanned"])
+        self.assertTrue(result["coverage"])
+        self.assertEqual(result["missingFiles"], [])
+
+    def test_manifest_comparison_normalizes_windows_paths(self):
+        report = self.report("WARNING")
+        expected = ["./" + p.replace("/", "\\") for p in report["paths"]["scanned"]]
+        self.assertTrue(module.gate(report, expected_paths=expected)["coverage"])
+
+    def test_java_audit_requires_complete_java_coverage_without_web_files(self):
+        path = "server/auth/src/main/java/TokenFilter.java"
+        report = {"paths": {"scanned": [path]}, "results": []}
+        self.assertTrue(module.gate(report, expected_paths=[path], java_only=True)["coverage"])
+        self.assertFalse(module.gate(report, expected_paths=[path, path + "Missing.java"], java_only=True)["coverage"])
+
     def test_production_parse_failure_is_blocked(self):
         report = self.report("WARNING")
         report["errors"] = [{"path": "web/src/app.ts", "type": "Syntax error"}]
