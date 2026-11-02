@@ -3,11 +3,12 @@ package repository
 import (
 	"archive/zip"
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"io"
 	"os"
-	"os/exec"
 	"slices"
 	"sort"
 	"strings"
@@ -24,22 +25,89 @@ type countedLiveTreeReader struct {
 
 const fixedPublicCommitSHA = "49f948faa9258a0c61caceaf225e179651397431"
 
+func liveTreeToken(getenv func(string) string) (string, error) {
+	var token string
+	if getenv("SKILLHUB_GITHUB_SYNC_LIVE_ANONYMOUS") == "1" {
+		return token, nil
+	}
+	token = strings.TrimSpace(getenv("SKILLHUB_GITHUB_SYNC_LIVE_TOKEN"))
+	if token == "" {
+		return token, errors.New("set SKILLHUB_GITHUB_SYNC_LIVE_TOKEN or explicitly enable anonymous live tests")
+	}
+	return token, nil
+}
+
+func TestLiveTreeTokenRequiresExplicitCredentialConfiguration(t *testing.T) {
+	if _, err := liveTreeToken(func(string) string { return "" }); err == nil {
+		t.Fatal("unconfigured live tests must not borrow a local account credential")
+	}
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		t.Fatal(err)
+	}
+	configured := hex.EncodeToString(bytes)
+	token, err := liveTreeToken(func(name string) string {
+		if name == "SKILLHUB_GITHUB_SYNC_LIVE_TOKEN" {
+			return " " + configured + "\n"
+		}
+		return ""
+	})
+	if err != nil || token != configured {
+		t.Fatal("explicit credential was not loaded correctly")
+	}
+}
+
+func TestAnonymousLiveTreeDoesNotLoadCredentials(t *testing.T) {
+	token, err := liveTreeToken(func(name string) string {
+		if name != "SKILLHUB_GITHUB_SYNC_LIVE_ANONYMOUS" {
+			t.Fatal("anonymous mode read a credential")
+		}
+		return "1"
+	})
+	if err != nil || token != "" {
+		t.Fatal("anonymous mode must have no credential")
+	}
+}
+
+func boundedArchiveDigest(reader io.Reader, expectedSize int64) (int64, string, error) {
+	digest := sha256.New()
+	count, err := io.CopyN(digest, reader, expectedSize+1)
+	if errors.Is(err, io.EOF) {
+		err = nil
+	}
+	return count, hex.EncodeToString(digest.Sum(nil)), err
+}
+
+func TestArchiveDigestReadsAtMostOneByteBeyondExpectedSize(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		contents string
+		size     int64
+		wantRead int
+	}{
+		{name: "exact", contents: "archive", size: 7, wantRead: 7},
+		{name: "oversized", contents: strings.Repeat("x", 100), size: 7, wantRead: 8},
+		{name: "truncated", contents: "zip", size: 7, wantRead: 3},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			reader := strings.NewReader(test.contents)
+			count, digest, err := boundedArchiveDigest(reader, test.size)
+			if err != nil || count != int64(test.wantRead) || reader.Len() != len(test.contents)-test.wantRead {
+				t.Fatalf("unexpected bounded read: count=%d remaining=%d error=%v", count, reader.Len(), err)
+			}
+			expected := sha256.Sum256([]byte(test.contents[:test.wantRead]))
+			if digest != hex.EncodeToString(expected[:]) {
+				t.Fatal("archive fingerprint differs from the bounded content")
+			}
+		})
+	}
+}
+
 func loadFixedPublicTree(t *testing.T, ctx context.Context) (TreeSnapshot, int) {
 	t.Helper()
-	anonymous := os.Getenv("SKILLHUB_GITHUB_SYNC_LIVE_ANONYMOUS") == "1"
-	token := ""
-	if !anonymous {
-		token = os.Getenv("SKILLHUB_GITHUB_SYNC_LIVE_TOKEN")
-		if token == "" {
-			output, err := exec.CommandContext(ctx, "gh", "auth", "token").Output()
-			if err != nil {
-				t.Fatal("no configured GitHub test token or usable local gh authentication")
-			}
-			token = strings.TrimSpace(string(output))
-		}
-		if token == "" {
-			t.Fatal("GitHub test token is empty")
-		}
+	token, err := liveTreeToken(os.Getenv)
+	if err != nil {
+		t.Fatal(err)
 	}
 	client := github.NewClient(token)
 	metadata, _, err := client.GetRepository(ctx, "openai", "skills")
@@ -74,7 +142,7 @@ func (reader *countedLiveTreeReader) GetTree(ctx context.Context, owner, name, s
 
 // This opt-in test checks the real GitHub REST metadata path for a fixed public
 // commit. SKILLHUB_GITHUB_SYNC_LIVE_ANONYMOUS=1 avoids local gh credentials;
-// otherwise any credential stays in process memory and is never included in output.
+// otherwise an explicit environment credential stays in memory and is never logged.
 func TestLiveEnumerateFixedPublicGitHubTree(t *testing.T) {
 	if os.Getenv("SKILLHUB_GITHUB_SYNC_LIVE_TREE") != "1" {
 		t.Skip("set SKILLHUB_GITHUB_SYNC_LIVE_TREE=1 to query the public GitHub Tree API")
@@ -230,11 +298,10 @@ func TestLiveAcquireAllFixedPublicSkillsSequentially(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read package %s: %v", plan.Root, err)
 			}
-			digest := sha256.New()
-			storedBytes, copyErr := io.Copy(digest, stored)
+			storedBytes, digest, copyErr := boundedArchiveDigest(stored, artifact.Size)
 			closeErr := stored.Close()
 			if copyErr != nil || closeErr != nil || storedBytes != artifact.Size ||
-				hex.EncodeToString(digest.Sum(nil)) != artifact.SHA256 {
+				digest != artifact.SHA256 {
 				t.Fatalf("package %s archive size or digest mismatch: copy=%v close=%v",
 					plan.Root, copyErr, closeErr)
 			}

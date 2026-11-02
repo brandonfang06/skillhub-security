@@ -1,5 +1,7 @@
 # Source review and verification — 2026-11-02
 
+This report records the initial scan-workspace delivery. The expanded changes for all requested CWE categories and the final verification are tracked in [Requested CWE follow-up](2026-11-02-requested-cwe-follow-up.md); its dispositions supersede the initial audit-only entries below.
+
 Destination: `brandonfang06/skillhub-security`, branch `dev`. Starting commit: `8c9c085659a412f61f64621e988b1c1fdd017e89`; upstream source base remains `326cbd62244aac7dbd7a97a136148231d6a46ce6` (v0.2.25). The separate Python repository is untouched.
 
 ## Findings review

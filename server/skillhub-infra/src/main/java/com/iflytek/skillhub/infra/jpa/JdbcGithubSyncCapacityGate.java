@@ -38,7 +38,7 @@ public class JdbcGithubSyncCapacityGate {
     }
 
     public int activeCount(Long namespaceId, Instant now) {
-        String sql = """
+        Integer count = jdbc.queryForObject("""
                 SELECT count(*) FROM (
                     SELECT admission.namespace_id, admission.repository_id, admission.skill_path
                     FROM github_sync_package_admission admission
@@ -52,10 +52,8 @@ public class JdbcGithubSyncCapacityGate {
                     WHERE ingestion.status IN ('RECEIVED', 'VALIDATING', 'RETRY_WAIT',
                                                'VALIDATED', 'READY_FOR_REVIEW', 'BLOCKED')
                 ) active_coordinates
-                """ + (namespaceId == null ? "" : " WHERE active_coordinates.namespace_id = ?");
-        Integer count = namespaceId == null
-                ? jdbc.queryForObject(sql, Integer.class, Timestamp.from(now))
-                : jdbc.queryForObject(sql, Integer.class, Timestamp.from(now), namespaceId);
+                WHERE (?::bigint IS NULL OR active_coordinates.namespace_id = ?)
+                """, Integer.class, Timestamp.from(now), namespaceId, namespaceId);
         return count == null ? 0 : count;
     }
 

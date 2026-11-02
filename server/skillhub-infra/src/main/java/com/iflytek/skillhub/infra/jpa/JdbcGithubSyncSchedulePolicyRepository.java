@@ -15,12 +15,12 @@ public class JdbcGithubSyncSchedulePolicyRepository implements GithubSyncSchedul
 
     @Override
     public GithubSyncSchedulePolicy get() {
-        return read("SELECT * FROM github_sync_schedule_policy WHERE id = TRUE");
+        return read(false);
     }
 
     @Override
     public GithubSyncSchedulePolicy getForUpdate() {
-        return read("SELECT * FROM github_sync_schedule_policy WHERE id = TRUE FOR UPDATE");
+        return read(true);
     }
 
     @Override
@@ -62,8 +62,10 @@ public class JdbcGithubSyncSchedulePolicyRepository implements GithubSyncSchedul
         return get();
     }
 
-    private GithubSyncSchedulePolicy read(String sql) {
-        return jdbc.query(sql, result -> {
+    private GithubSyncSchedulePolicy read(boolean forUpdate) {
+        return jdbc.query(forUpdate
+                ? "SELECT * FROM github_sync_schedule_policy WHERE id = TRUE FOR UPDATE"
+                : "SELECT * FROM github_sync_schedule_policy WHERE id = TRUE", result -> {
             if (!result.next()) {
                 throw new IllegalStateException("GitHub sync schedule policy is missing");
             }

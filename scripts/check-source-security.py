@@ -1,4 +1,4 @@
-"""Gate production Java/frontend and workflow findings from an unfiltered Semgrep report."""
+"""Gate Java/Go/frontend and workflow findings from an unfiltered Semgrep report."""
 import argparse
 import json
 from pathlib import Path
@@ -14,6 +14,7 @@ def normalized_path(path):
 def primary_path(path):
     path = normalized_path(path)
     return bool(re.match(r"server/[^/]+/src/main/java/", path)
+                or (path.startswith("github-sync-go/") and path.endswith(".go"))
                 or path.startswith(".github/workflows/")
                 or (path.startswith("web/src/") and not re.search(r"\.(test|spec)\.[jt]sx?$", path)))
 
@@ -21,14 +22,14 @@ def primary_path(path):
 def tracked_primary_sources():
     tracked = subprocess.check_output(["git", "ls-files", "-z"], text=True).split("\0")
     return [path for path in tracked if primary_path(path)
-            and Path(path).suffix in {".java", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".yml", ".yaml"}]
+            and Path(path).suffix in {".java", ".go", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".yml", ".yaml"}]
 
 
 def gate(report, expected_paths=None, java_only=False):
     scanned = [normalized_path(path) for path in report.get("paths", {}).get("scanned", [])]
     expected = {normalized_path(path) for path in expected_paths} if expected_paths is not None else set()
     missing = sorted(expected - set(scanned))
-    prefixes = ("server/",) if java_only else ("server/", "web/src/", ".github/workflows/")
+    prefixes = ("server/",) if java_only else ("server/", "github-sync-go/", "web/src/", ".github/workflows/")
     coverage = all(any(path.startswith(prefix) for path in scanned) for prefix in prefixes) and not missing
     findings = []
     for finding in report.get("results", []):

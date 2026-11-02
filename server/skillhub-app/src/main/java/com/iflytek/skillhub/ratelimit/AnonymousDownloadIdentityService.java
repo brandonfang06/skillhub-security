@@ -15,7 +15,6 @@ import java.util.Base64;
 import java.util.Set;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,7 +62,10 @@ public class AnonymousDownloadIdentityService {
         String cookieId = extractValidCookieId(request);
         if (cookieId == null) {
             cookieId = generateId();
-            response.addHeader("Set-Cookie", buildCookie(cookieId, request).toString());
+            Cookie cookie = buildCookie(cookieId);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(request.isSecure());
+            response.addCookie(cookie);
         }
         return new AnonymousDownloadIdentity(hash(ip), hash(cookieId));
     }
@@ -100,23 +102,13 @@ public class AnonymousDownloadIdentityService {
         return MessageDigest.isEqual(expected, actual) ? parts[1] : null;
     }
 
-    private ResponseCookie buildCookie(String cookieId, HttpServletRequest request) {
+    private Cookie buildCookie(String cookieId) {
         Duration maxAge = properties.getAnonymousCookieMaxAge();
-        return ResponseCookie.from(properties.getAnonymousCookieName(), encodeCookieValue(cookieId))
-                .httpOnly(true)
-                .secure(isSecure(request))
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(maxAge)
-                .build();
-    }
-
-    private boolean isSecure(HttpServletRequest request) {
-        if (request.isSecure()) {
-            return true;
-        }
-        String forwardedProto = request.getHeader("X-Forwarded-Proto");
-        return forwardedProto != null && forwardedProto.equalsIgnoreCase("https");
+        Cookie cookie = new Cookie(properties.getAnonymousCookieName(), encodeCookieValue(cookieId));
+        cookie.setAttribute("SameSite", "Lax");
+        cookie.setPath("/");
+        cookie.setMaxAge(Math.toIntExact(maxAge.toSeconds()));
+        return cookie;
     }
 
     private String encodeCookieValue(String id) {

@@ -9,7 +9,8 @@ spec.loader.exec_module(module)
 
 class SourceSecurityGateTest(unittest.TestCase):
     def report(self, severity, path="web/src/app.ts"):
-        return {"paths": {"scanned": ["server/app/src/main/java/App.java", "web/src/app.ts", ".github/workflows/test.yml"]},
+        return {"paths": {"scanned": ["server/app/src/main/java/App.java", "web/src/app.ts", ".github/workflows/test.yml",
+                                     "github-sync-go/internal/repository/tree_live_test.go"]},
                 "results": [{"path": path, "extra": {"severity": severity}}]}
 
     def test_critical_is_blocked_even_though_it_is_not_error(self):
@@ -22,6 +23,22 @@ class SourceSecurityGateTest(unittest.TestCase):
 
     def test_workflow_execution_findings_are_in_scope(self):
         self.assertEqual(len(module.gate(self.report("ERROR", ".github/workflows/release.yml"))["blockingFindings"]), 1)
+
+    def test_go_live_test_findings_are_in_scope(self):
+        path = "github-sync-go/internal/repository/tree_live_test.go"
+        self.assertTrue(module.primary_path(path))
+        self.assertEqual(len(module.gate(self.report("ERROR", path))["blockingFindings"]), 1)
+
+    def test_go_source_coverage_is_required(self):
+        report = self.report("WARNING")
+        report["paths"]["scanned"] = [path for path in report["paths"]["scanned"]
+                                      if not path.startswith("github-sync-go/")]
+        self.assertFalse(module.gate(report)["coverage"])
+
+    def test_go_parse_failure_is_blocked(self):
+        report = self.report("WARNING")
+        report["errors"] = [{"path": "github-sync-go/internal/repository/tree_live_test.go", "type": "Syntax error"}]
+        self.assertEqual(len(module.gate(report)["analysisErrors"]), 1)
 
     def test_missing_coverage_is_not_success(self):
         self.assertFalse(module.gate({"results": []})["coverage"])

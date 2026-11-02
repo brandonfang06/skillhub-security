@@ -1,14 +1,13 @@
 package com.iflytek.skillhub.infra.jpa;
 
 import com.iflytek.skillhub.githubsync.GithubSkillPathPolicy;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -69,26 +68,17 @@ public class JdbcGithubSyncPathPresenceRepository {
         List<PathBinding> missing = absent.stream()
                 .filter(binding -> !GithubSkillPathPolicy.ignored(binding.skillPath(), patterns))
                 .toList();
-        jdbc.batchUpdate("""
+        MapSqlParameterSource[] parameters = missing.stream()
+                .map(binding -> new MapSqlParameterSource("commitSha", commitSha)
+                        .addValue("now", Timestamp.from(now)).addValue("id", binding.id())
+                        .addValue("sourceId", sourceId))
+                .toArray(MapSqlParameterSource[]::new);
+        new NamedParameterJdbcTemplate(jdbc).batchUpdate("""
                 UPDATE github_source_skill_binding
-                SET upstream_presence = 'MISSING', presence_commit_sha = ?,
-                    missing_since = COALESCE(missing_since, ?), updated_at = ?
-                WHERE id = ? AND source_id = ?
-                """, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement statement, int index) throws SQLException {
-                statement.setString(1, commitSha);
-                statement.setTimestamp(2, Timestamp.from(now));
-                statement.setTimestamp(3, Timestamp.from(now));
-                statement.setLong(4, missing.get(index).id());
-                statement.setLong(5, sourceId);
-            }
-
-            @Override
-            public int getBatchSize() {
-                return missing.size();
-            }
-        });
+                SET upstream_presence = 'MISSING', presence_commit_sha = :commitSha,
+                    missing_since = COALESCE(missing_since, :now), updated_at = :now
+                WHERE id = :id AND source_id = :sourceId
+                """, parameters);
     }
 
     private record Snapshot(long namespaceId, String status, boolean rulesMatch) {}

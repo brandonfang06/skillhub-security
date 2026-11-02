@@ -81,8 +81,9 @@ class DownloadRateLimitControllerTest {
                 .anySatisfy(cookie -> {
                     assertThat(cookie).contains("skillhub_anon_dl=");
                     assertThat(cookie).contains("HttpOnly");
-                    assertThat(cookie).contains("SameSite=Lax");
                 });
+        assertThat(result.getResponse().getCookie("skillhub_anon_dl").getAttribute("SameSite"))
+                .isEqualTo("Lax");
 
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         verify(rateLimiter, times(2)).tryAcquire(keyCaptor.capture(), anyInt(), anyInt());

@@ -202,11 +202,8 @@ func TestAcquirePackageStopsOnSIGTERM(t *testing.T) {
 		t.Fatal(err)
 	}
 	root := t.TempDir()
-	binary, err := os.Executable()
-	if err != nil {
-		t.Fatal(err)
-	}
-	command := exec.Command(binary, "-test.run=^TestAcquirePackageStopsOnSIGTERM$", "-test.v")
+	// The kernel reference keeps this Linux-only fixture bound to its running test executable.
+	command := exec.Command("/proc/self/exe", "-test.run=^TestAcquirePackageStopsOnSIGTERM$", "-test.v")
 	command.Env = append(os.Environ(),
 		"PATH="+fakeBin+string(os.PathListSeparator)+os.Getenv("PATH"),
 		"SKILLHUB_TEST_GIT_STARTED="+started,

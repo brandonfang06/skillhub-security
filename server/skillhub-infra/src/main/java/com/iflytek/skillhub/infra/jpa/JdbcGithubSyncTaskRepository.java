@@ -18,6 +18,7 @@ import com.iflytek.skillhub.githubsync.GithubRepositoryMetadataResult;
 import com.iflytek.skillhub.githubsync.GithubRepositoryPathResult;
 import com.iflytek.skillhub.githubsync.RepositorySkillCoordinate;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.SqlArrayValue;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -221,20 +222,12 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
             // Serialize official grant decisions across all workers. Legacy candidates remain eligible.
             jdbc.queryForObject("SELECT id FROM github_official_discovery_budget WHERE id FOR UPDATE", Boolean.class);
         }
-        Optional<GithubSyncTaskLease> claimed = jdbc.query(connection -> {
-            var statement = connection.prepareStatement(CLAIM_SQL);
-            statement.setString(1, kind.name());
-            statement.setTimestamp(2, Timestamp.from(now));
-            statement.setTimestamp(3, Timestamp.from(now));
-            statement.setArray(4, connection.createArrayOf("text", capabilities.toArray()));
-            statement.setString(5, leaseTokenHash);
-            statement.setTimestamp(6, Timestamp.from(expiresAt));
-            statement.setTimestamp(7, Timestamp.from(now));
-            statement.setTimestamp(8, Timestamp.from(expiresAt));
-            statement.setString(9, workerId);
-            statement.setTimestamp(10, Timestamp.from(now));
-            return statement;
-        }, result -> result.next() ? Optional.of(mapLease(result)) : Optional.empty());
+        Optional<GithubSyncTaskLease> claimed = jdbc.query(CLAIM_SQL,
+                result -> result.next() ? Optional.of(mapLease(result)) : Optional.empty(),
+                kind.name(), Timestamp.from(now), Timestamp.from(now),
+                new SqlArrayValue("text", capabilities.toArray()), leaseTokenHash,
+                Timestamp.from(expiresAt), Timestamp.from(now), Timestamp.from(expiresAt),
+                workerId, Timestamp.from(now));
         claimed.ifPresent(task -> jdbc.update("""
                 INSERT INTO github_sync_claim_cursor (kind, namespace_id, last_claimed_at)
                 VALUES (?, ?, ?)
@@ -285,20 +278,11 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
     @Override
     public Optional<Instant> renew(UUID taskId, long leaseGeneration, String leaseTokenHash,
                                    Instant now, Instant expiresAt) {
-        return jdbc.query(connection -> {
-            var statement = connection.prepareStatement(RENEW_SQL);
-            statement.setTimestamp(1, Timestamp.from(expiresAt));
-            statement.setTimestamp(2, Timestamp.from(now));
-            statement.setTimestamp(3, Timestamp.from(expiresAt));
-            statement.setTimestamp(4, Timestamp.from(now));
-            statement.setObject(5, taskId);
-            statement.setLong(6, leaseGeneration);
-            statement.setString(7, leaseTokenHash);
-            statement.setTimestamp(8, Timestamp.from(now));
-            return statement;
-        }, result -> result.next()
+        return jdbc.query(RENEW_SQL, result -> result.next()
                 ? Optional.of(result.getTimestamp("lease_expires_at").toInstant())
-                : Optional.empty());
+                : Optional.empty(), Timestamp.from(expiresAt), Timestamp.from(now),
+                Timestamp.from(expiresAt), Timestamp.from(now), taskId, leaseGeneration,
+                leaseTokenHash, Timestamp.from(now));
     }
 
     @Override
@@ -402,19 +386,13 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
         if (policy == null) {
             throw new IllegalStateException("GitHub sync admission policy is missing");
         }
-        AdmissionTask task = jdbc.query(connection -> {
-            var statement = connection.prepareStatement(LOCK_ADMISSION_TASK_SQL);
-            statement.setObject(1, taskId);
-            statement.setLong(2, leaseGeneration);
-            statement.setString(3, leaseTokenHash);
-            statement.setTimestamp(4, Timestamp.from(now));
-            return statement;
-        }, result -> result.next() ? new AdmissionTask(
+        AdmissionTask task = jdbc.query(LOCK_ADMISSION_TASK_SQL, result -> result.next() ? new AdmissionTask(
                 result.getLong("namespace_id"), (Long) result.getObject("source_id"),
                 result.getString("kind"), result.getString("mode"),
                 result.getString("fixed_commit_sha"), result.getString("snapshot_repository_id"),
                 result.getString("snapshot_commit_sha"),
-                (Long) result.getObject("source_repository_id")) : null);
+                (Long) result.getObject("source_repository_id")) : null,
+                taskId, leaseGeneration, leaseTokenHash, Timestamp.from(now));
         if (task == null) {
             return GithubPackageAdmissionResult.rejected(GithubPackageAdmissionResult.Status.LEASE_STALE);
         }
@@ -725,8 +703,7 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
                 if (pinned != 1) {
                     return GithubDiscoveryBatchResult.RESULT_CONFLICT;
                 }
-                Long sourceId = jdbc.query(connection -> {
-                    var statement = connection.prepareStatement("""
+                Long sourceId = jdbc.query("""
                         INSERT INTO github_source_binding
                             (namespace_id, repository_id, owner_login, repository_name,
                              default_branch, visibility, status, next_check_at)
@@ -737,19 +714,11 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
                             default_branch = EXCLUDED.default_branch,
                             updated_at = CURRENT_TIMESTAMP
                         RETURNING id
-                        """);
-                    statement.setLong(1, lease.namespaceId());
-                    statement.setLong(2, candidate.repositoryId());
-                    statement.setString(3, candidate.owner());
-                    statement.setString(4, candidate.name());
-                    statement.setString(5, candidate.defaultBranch());
-                    statement.setString(6, "CATALOG".equals(namespaceType)
-                            ? "PUBLIC" : configured.visibility());
-                    statement.setString(7, "TEAM".equals(namespaceType) && !configured.enabled()
-                            ? "PAUSED" : "ACTIVE");
-                    statement.setTimestamp(8, Timestamp.from(now));
-                    return statement;
-                }, result -> result.next() ? result.getLong("id") : null);
+                        """, result -> result.next() ? result.getLong("id") : null,
+                        lease.namespaceId(), candidate.repositoryId(), candidate.owner(), candidate.name(),
+                        candidate.defaultBranch(), "CATALOG".equals(namespaceType) ? "PUBLIC" : configured.visibility(),
+                        "TEAM".equals(namespaceType) && !configured.enabled() ? "PAUSED" : "ACTIVE",
+                        Timestamp.from(now));
                 if (sourceId == null) {
                     throw new IllegalStateException("Could not persist curated GitHub repository");
                 }
@@ -807,24 +776,16 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
         var createdRepositories = new java.util.ArrayList<Long>();
         for (GithubDiscoveryCandidate candidate : batch.repositories().stream()
                 .sorted(Comparator.comparingLong(GithubDiscoveryCandidate::repositoryId)).toList()) {
-            Long candidateId = jdbc.query(connection -> {
-                var statement = connection.prepareStatement("""
+            Long candidateId = jdbc.query("""
                         INSERT INTO github_discovery_candidate
                             (namespace_id, repository_id, owner_login, repository_name,
                              default_branch, first_seen_at, last_seen_at)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                         ON CONFLICT (namespace_id, repository_id) DO NOTHING
                         RETURNING id
-                        """);
-                statement.setLong(1, lease.namespaceId());
-                statement.setLong(2, candidate.repositoryId());
-                statement.setString(3, candidate.owner());
-                statement.setString(4, candidate.name());
-                statement.setString(5, candidate.defaultBranch());
-                statement.setTimestamp(6, Timestamp.from(now));
-                statement.setTimestamp(7, Timestamp.from(now));
-                return statement;
-            }, result -> result.next() ? result.getLong("id") : null);
+                        """, result -> result.next() ? result.getLong("id") : null,
+                    lease.namespaceId(), candidate.repositoryId(), candidate.owner(), candidate.name(),
+                    candidate.defaultBranch(), Timestamp.from(now), Timestamp.from(now));
             if (candidateId != null) {
                 createdRepositories.add(candidate.repositoryId());
             } else {
@@ -977,16 +938,11 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
             String leaseTokenHash, String commitSha, boolean complete, String pathCheckpoint,
             List<String> incompleteSubtrees, List<GithubRepositoryPathResult> pathResults,
             Instant retryAt, GithubSyncDeferralReason deferralReason, Instant now, Instant nextCheckAt) {
-        RepositoryLease lease = jdbc.query(connection -> {
-            var statement = connection.prepareStatement(LOCK_REPOSITORY_LEASE_SQL);
-            statement.setObject(1, taskId);
-            statement.setLong(2, leaseGeneration);
-            statement.setString(3, leaseTokenHash);
-            statement.setTimestamp(4, Timestamp.from(now));
-            return statement;
-        }, result -> result.next() ? new RepositoryLease((Long) result.getObject("source_id"),
+        RepositoryLease lease = jdbc.query(LOCK_REPOSITORY_LEASE_SQL,
+                result -> result.next() ? new RepositoryLease((Long) result.getObject("source_id"),
                 result.getString("fixed_commit_sha"), result.getString("snapshot_commit_sha"),
-                result.getString("path_checkpoint")) : null);
+                result.getString("path_checkpoint")) : null,
+                taskId, leaseGeneration, leaseTokenHash, Timestamp.from(now));
         if (lease == null) {
             return GithubRepositoryCompletionResult.LEASE_STALE;
         }
@@ -1188,14 +1144,7 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
 
     private DiscoveryLease lockDiscoveryLease(UUID taskId, long leaseGeneration,
             String leaseTokenHash, Instant now) {
-        return jdbc.query(connection -> {
-            var statement = connection.prepareStatement(LOCK_DISCOVERY_LEASE_SQL);
-            statement.setObject(1, taskId);
-            statement.setLong(2, leaseGeneration);
-            statement.setString(3, leaseTokenHash);
-            statement.setTimestamp(4, Timestamp.from(now));
-            return statement;
-        }, result -> {
+        return jdbc.query(LOCK_DISCOVERY_LEASE_SQL, result -> {
             if (!result.next()) {
                 return null;
             }
@@ -1215,7 +1164,7 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
             return new DiscoveryLease(result.getLong("namespace_id"),
                     result.getString("discovery_checkpoint"), budget,
                     result.getString("entry_type"), result.getString("entry_id"));
-        });
+        }, taskId, leaseGeneration, leaseTokenHash, Timestamp.from(now));
     }
 
     private record DiscoveryLease(long namespaceId, String checkpoint, int budget,
@@ -1224,21 +1173,14 @@ public class JdbcGithubSyncTaskRepository implements GithubSyncTaskRepository {
     private record ConfiguredRepository(String visibility, boolean enabled) {}
 
     private LockedTask lockLease(UUID taskId, long generation, String tokenHash, Instant now) {
-        return jdbc.query(connection -> {
-            var statement = connection.prepareStatement(LOCK_LEASE_SQL);
-            statement.setObject(1, taskId);
-            statement.setLong(2, generation);
-            statement.setString(3, tokenHash);
-            statement.setTimestamp(4, Timestamp.from(now));
-            return statement;
-        }, result -> {
+        return jdbc.query(LOCK_LEASE_SQL, result -> {
             if (!result.next()) {
                 return null;
             }
             long sourceId = result.getLong("source_id");
             return new LockedTask(result.wasNull() ? null : sourceId,
                     result.getString("kind"), result.getString("mode"));
-        });
+        }, taskId, generation, tokenHash, Timestamp.from(now));
     }
 
     private record LockedTask(Long sourceId, String kind, String mode) {}

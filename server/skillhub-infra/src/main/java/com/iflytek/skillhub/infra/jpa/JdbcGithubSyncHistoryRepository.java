@@ -2,12 +2,12 @@ package com.iflytek.skillhub.infra.jpa;
 
 import com.iflytek.skillhub.githubsync.GithubSyncHistoryRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.SqlArrayValue;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,12 +106,10 @@ public class JdbcGithubSyncHistoryRepository implements GithubSyncHistoryReposit
                 """, (result, row) -> result.getObject("id", UUID.class),
                 Timestamp.from(cutoff), Timestamp.from(cutoff), batchSize);
         if (!taskIds.isEmpty()) {
-            String placeholders = String.join(",", Collections.nCopies(taskIds.size(), "?"));
-            Object[] ids = taskIds.toArray();
             jdbc.update("""
                     DELETE FROM github_sync_path_result path
                     USING github_sync_task task
-                    WHERE path.task_id = task.id AND task.id IN (%s)
+                    WHERE path.task_id = task.id AND task.id = ANY (?::uuid[])
                       AND (task.source_id IS NULL OR EXISTS (
                           SELECT 1 FROM github_sync_path_result newer_path
                           JOIN github_sync_task newer_task ON newer_task.id = newer_path.task_id
@@ -120,10 +118,7 @@ public class JdbcGithubSyncHistoryRepository implements GithubSyncHistoryReposit
                             AND (newer_task.created_at, newer_task.id,
                                  newer_path.updated_at, newer_path.id)
                               > (task.created_at, task.id, path.updated_at, path.id)))
-                    """.formatted(placeholders), ids);
-            Object[] updateArgs = new Object[taskIds.size() + 1];
-            updateArgs[0] = Timestamp.from(now);
-            System.arraycopy(ids, 0, updateArgs, 1, ids.length);
+                    """, new SqlArrayValue("uuid", taskIds.toArray()));
             jdbc.update("""
                     UPDATE github_sync_task
                     SET snapshot_json = jsonb_strip_nulls(jsonb_build_object(
@@ -134,8 +129,8 @@ public class JdbcGithubSyncHistoryRepository implements GithubSyncHistoryReposit
                         incomplete_subtrees = '[]'::jsonb, last_error_detail = NULL,
                         credential_id = NULL, credential_fingerprint = NULL,
                         details_purged_at = ?
-                    WHERE id IN (%s)
-                    """.formatted(placeholders), updateArgs);
+                    WHERE id = ANY (?::uuid[])
+                    """, Timestamp.from(now), new SqlArrayValue("uuid", taskIds.toArray()));
         }
         int runs = jdbc.update("""
                 WITH picked AS (

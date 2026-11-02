@@ -31,6 +31,29 @@ class InitialAuthSettingsInitializerTest {
     @Mock private ApplicationArguments args;
 
     @Test
+    void postgresInitializationLockUsesAConstantPreparedStatementAndBoundKey() throws Exception {
+        var connection = org.mockito.Mockito.mock(java.sql.Connection.class);
+        var metadata = org.mockito.Mockito.mock(java.sql.DatabaseMetaData.class);
+        var statement = org.mockito.Mockito.mock(java.sql.PreparedStatement.class);
+        when(connection.getMetaData()).thenReturn(metadata);
+        when(metadata.getDatabaseProductName()).thenReturn("PostgreSQL");
+        when(connection.prepareStatement("SELECT pg_advisory_xact_lock(?)")).thenReturn(statement);
+        when(jdbc.execute(any(org.springframework.jdbc.core.ConnectionCallback.class)))
+                .thenAnswer(invocation -> ((org.springframework.jdbc.core.ConnectionCallback<?>)
+                        invocation.getArgument(0)).doInConnection(connection));
+        when(settings.findBySettingKey(any(String.class)))
+                .thenReturn(Optional.of(new SystemSetting("already-initialized", Map.of())));
+
+        new InitialAuthSettingsInitializer(new InitialAuthSettingsProperties(), settings, rules,
+                roles, new ObjectMapper(), jdbc).run(args);
+
+        verify(connection, never()).createStatement();
+        verify(statement).setLong(1, 92320261010L);
+        verify(statement).execute();
+        verify(statement).close();
+    }
+
+    @Test
     void emptyDatabaseGetsDefaultSettingsAndPermanentRuleSeedMarker() {
         when(settings.findBySettingKey(LocalAuthSettingsService.SETTING_KEY)).thenReturn(Optional.empty());
         when(settings.findBySettingKey("auth.initial-role-grants.initialized")).thenReturn(Optional.empty());

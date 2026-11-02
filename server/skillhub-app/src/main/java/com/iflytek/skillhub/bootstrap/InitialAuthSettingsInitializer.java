@@ -22,7 +22,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ConnectionCallback;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,8 +61,9 @@ public class InitialAuthSettingsInitializer implements ApplicationRunner {
         // Serialize initialization across PostgreSQL replicas before checking missing rows.
         jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
             if ("PostgreSQL".equalsIgnoreCase(connection.getMetaData().getDatabaseProductName())) {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("SELECT pg_advisory_xact_lock(92320261010)");
+                try (PreparedStatement statement = connection.prepareStatement("SELECT pg_advisory_xact_lock(?)")) {
+                    statement.setLong(1, 92320261010L);
+                    statement.execute();
                 }
             }
             return null;
