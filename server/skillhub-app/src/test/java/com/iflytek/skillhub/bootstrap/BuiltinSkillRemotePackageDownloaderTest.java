@@ -60,6 +60,23 @@ class BuiltinSkillRemotePackageDownloaderTest {
     }
 
     @Test
+    void rejectsUnicodeAndEncodedHostConfusionWithoutNetworkAccess() {
+        FakeHttpClient client = new FakeHttpClient(200, new byte[] {1});
+        var downloader = new BuiltinSkillRemotePackageDownloader(new SkillPublishProperties(), client);
+        for (String url : java.util.List.of(
+                "https://bjcdn.openstorage.cn\u3002evil.example/a.zip",
+                "https://\uff42jcdn.openstorage.cn/a.zip",
+                "https://bjcdn.openstorage.cn%2eevil.example/a.zip",
+                "https://bjcdn.openstorage.cn.evil.example/a.zip",
+                "https://bjcdn.openstorage.cn@evil.example/a.zip")) {
+            assertThat(downloader.download(URI.create(url))).as(url).isEmpty();
+        }
+        assertThat(client.sendCalls).isZero();
+        assertThat(BuiltinSkillRemotePackageDownloader.isAllowedUrl(
+                URI.create("https://BJCDN.OPENSTORAGE.CN/a.zip"))).isTrue();
+    }
+
+    @Test
     void downloadsAllowedUrlWithThirtySecondRequestTimeout() {
         FakeHttpClient client = new FakeHttpClient(200, new byte[] {1, 2, 3});
         BuiltinSkillRemotePackageDownloader downloader = new BuiltinSkillRemotePackageDownloader(

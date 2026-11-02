@@ -519,7 +519,7 @@ class ScanTaskConsumerTest {
                 redissonClient(processingLock)
         );
         ScanTaskConsumer.ScanTaskPayload payload = new ScanTaskConsumer.ScanTaskPayload(
-                "task-failure", 42L, "/tmp/failure", null, ScannerType.SKILL_SCANNER);
+                "task-failure", 42L, SCAN_TEMP_DIR.resolve("failure").toString(), null, ScannerType.SKILL_SCANNER);
 
         assertThatThrownBy(() -> consumer.invokeProcessBusiness(payload))
                 .isInstanceOf(IllegalStateException.class)

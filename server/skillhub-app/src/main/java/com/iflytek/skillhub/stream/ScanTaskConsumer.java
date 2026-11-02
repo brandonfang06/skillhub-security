@@ -308,11 +308,17 @@ public class ScanTaskConsumer extends AbstractStreamConsumer<ScanTaskConsumer.Sc
             if (payload.skillPath() == null || payload.skillPath().isBlank()) {
                 throw new IllegalStateException("Security scan task missing skillPath and bundleKey");
             }
+            if (!isSafeScanPath(Paths.get(payload.skillPath()).toAbsolutePath().normalize())) {
+                throw new IllegalStateException("Unsafe local scan path");
+            }
             payload.markWorkingSkillPath(payload.skillPath());
             return payload.skillPath();
         }
 
         try {
+            if (Files.isSymbolicLink(SCAN_TEMP_DIR)) {
+                throw new IllegalStateException("Unsafe scan temp directory");
+            }
             Files.createDirectories(SCAN_TEMP_DIR);
             Path tempFile = Files.createTempFile(SCAN_TEMP_DIR, payload.versionId() + "-", ".zip");
             payload.markWorkingSkillPath(tempFile.toString());
@@ -342,8 +348,8 @@ public class ScanTaskConsumer extends AbstractStreamConsumer<ScanTaskConsumer.Sc
         }
         try {
             Path path = Paths.get(skillPath).toAbsolutePath().normalize();
-            if (!path.startsWith(SCAN_TEMP_DIR)) {
-                log.warn("Skipping cleanup for path outside scan temp directory: {}", skillPath);
+            if (!isSafeScanPath(path)) {
+                log.warn("Skipping cleanup for unsafe scan temp path");
                 return;
             }
             if (Files.isDirectory(path)) {
@@ -362,6 +368,19 @@ public class ScanTaskConsumer extends AbstractStreamConsumer<ScanTaskConsumer.Sc
             log.warn("Failed to cleanup temp path: {}, errorType={}",
                     skillPath, e.getClass().getSimpleName());
         }
+    }
+
+    private boolean isSafeScanPath(Path path) {
+        if (!path.startsWith(SCAN_TEMP_DIR) || path.equals(SCAN_TEMP_DIR)) {
+            return false;
+        }
+        for (Path current = path; current != null && current.startsWith(SCAN_TEMP_DIR);
+                current = current.getParent()) {
+            if (Files.isSymbolicLink(current)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String blankToNull(String value) {

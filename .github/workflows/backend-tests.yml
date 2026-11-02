@@ -3,6 +3,7 @@ name: backend-tests
 # Backend test suite for pull requests. Testcontainers-based tests need a
 # Docker daemon, which the GitHub-hosted runners provide.
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches: ["feat/authoring-*"]
