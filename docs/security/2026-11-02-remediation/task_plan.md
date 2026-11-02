@@ -8,4 +8,3 @@ Target: brandonfang06/skillhub-security dev, starting at 8c9c085659a412f61f64621
 4. [pending] Review complete diff, commit and integrate into dev without force; verify exact published commit CI before annotated security-semgrep-2026-11-02 tag. Verify remote branch and peeled tag SHA.
 
 Do not run unreviewed remediation scripts, add suppressions, modify generated files, overwrite existing tags or push upstream. Missing original organization findings do not imply acceptance.
-
