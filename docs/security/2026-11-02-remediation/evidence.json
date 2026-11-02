@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-02",
+  "sourceCommit": "234e3d33b791ef4ec7207d828d86b3a5be777d22",
+  "baselineCommit": "8c9c085659a412f61f64621e988b1c1fdd017e89",
+  "upstreamBase": "326cbd62244aac7dbd7a97a136148231d6a46ce6",
+  "originalOrganizationFindingsVerified": false,
+  "remediationKitAvailable": false,
+  "semgrepImage": "semgrep/semgrep@sha256:3db5c7af55eb1f512eac0abf0ab69a97b52c74b5e9a27314c221aee1a78d7ab2",
+  "officialJavaRulesCommit": "16b9e6d45f10649f6a531ec4838ed9924372c3bc",
+  "reports": [
+    {
+      "name": "semgrep.json",
+      "engineVersion": "1.181.1",
+      "scannedFiles": 2945,
+      "findings": 200,
+      "severities": {
+        "INFO": 5,
+        "WARNING": 193,
+        "ERROR": 1,
+        "MEDIUM": 1
+      },
+      "diagnostics": 71,
+      "expectedPrimaryFiles": 1605,
+      "missingPrimaryFiles": [],
+      "primaryBlockingFindings": [],
+      "primaryAnalysisErrors": [],
+      "workflowTemplateDiagnostics": 40,
+      "sha256": "bfc3e9083b9a892904fb9b1b8587cd9aab02b70b24e3a1f9ad03d685984a5552"
+    },
+    {
+      "name": "semgrep-java.json",
+      "engineVersion": "1.181.1",
+      "scannedFiles": 1429,
+      "findings": 5,
+      "severities": {
+        "WARNING": 3,
+        "INFO": 2
+      },
+      "diagnostics": 0,
+      "expectedPrimaryFiles": 1283,
+      "missingPrimaryFiles": [],
+      "primaryBlockingFindings": [],
+      "primaryAnalysisErrors": [],
+      "workflowTemplateDiagnostics": 0,
+      "sha256": "e46b6e36d3ec762e0ed7fca6c7505473e9099fee2960d5d34d95296dca86a6a0"
+    }
+  ],
+  "criticalDependencies": [
+    {
+      "report": "frontend-critical.json",
+      "packageEntries": 737,
+      "criticalFindings": 0,
+      "sha256": "baacf1d470e768f89e706fa0cf4cf8e5e534a29de6679208b3f9170443b89e41"
+    },
+    {
+      "report": "java-critical.json",
+      "packageEntries": 347,
+      "criticalFindings": 0,
+      "sha256": "82861742547ce3c538c104d5b0066af6540b67ae440aaa4ccfc252b6d26a788a"
+    }
+  ],
+  "java": {
+    "command": "./mvnw test (all reactor modules; make test-backend)",
+    "reportedTests": 2759,
+    "passedTests": 2729,
+    "failures": 0,
+    "errors": 0,
+    "conditionalSkips": 30,
+    "newSymlinkTestsSkipped": 0,
+    "run": 41432949875
+  },
+  "go": {
+    "commands": [
+      "go test -count=1 ./...",
+      "go vet ./..."
+    ],
+    "packagesPassed": 5,
+    "run": 41432949844,
+    "optInLiveTestsEnabled": false
+  },
+  "e2e": {
+    "passed": 182,
+    "skipped": 3,
+    "run": 41432949888
+  },
+  "frontend": {
+    "nodeVersions": [
+      22,
+      24
+    ],
+    "passedPerVersion": 1362,
+    "run": 41432949875
+  },
+  "securityRuns": {
+    "semgrepAndCriticalCves": 41432949850,
+    "codeql": 41432949719,
+    "dependencyReviewUnsupported": 41432949841
+  },
+  "codeqlLimit": "PR SARIF contained no new rule/path matches and zero security severity >=9 results. PR analysis context differs from dev; reductions are not attributed to this patch. Final dev evidence is recorded in the annotated tag.",
+  "additionalFullJavaRun": {
+    "run": 41432949819,
+    "reported": 2759,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 30
+  },
+  "mergeCommit": "0a2afafccefc2144f0e74c82fad3ba3b8099ddd1"
+}
