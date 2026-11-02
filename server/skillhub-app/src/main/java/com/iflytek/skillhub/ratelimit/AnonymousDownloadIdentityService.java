@@ -62,10 +62,7 @@ public class AnonymousDownloadIdentityService {
         String cookieId = extractValidCookieId(request);
         if (cookieId == null) {
             cookieId = generateId();
-            Cookie cookie = buildCookie(cookieId);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(request.isSecure());
-            response.addCookie(cookie);
+            issueCookie(cookieId, request, response);
         }
         return new AnonymousDownloadIdentity(hash(ip), hash(cookieId));
     }
@@ -102,13 +99,15 @@ public class AnonymousDownloadIdentityService {
         return MessageDigest.isEqual(expected, actual) ? parts[1] : null;
     }
 
-    private Cookie buildCookie(String cookieId) {
+    private void issueCookie(String cookieId, HttpServletRequest request, HttpServletResponse response) {
         Duration maxAge = properties.getAnonymousCookieMaxAge();
         Cookie cookie = new Cookie(properties.getAnonymousCookieName(), encodeCookieValue(cookieId));
+        cookie.setHttpOnly(true);
+        cookie.setSecure(request.isSecure());
         cookie.setAttribute("SameSite", "Lax");
         cookie.setPath("/");
         cookie.setMaxAge(Math.toIntExact(maxAge.toSeconds()));
-        return cookie;
+        response.addCookie(cookie);
     }
 
     private String encodeCookieValue(String id) {

@@ -1,0 +1,99 @@
+{
+  "date": "2026-11-02",
+  "verifiedIntegrationSource": "717640d1fe5a844752b7afda599adb71028c82c1",
+  "mergeCommit": "6ccdd7d16cb970f1b2128e9cd1033a867e649cc4",
+  "upstreamBase": "326cbd62244aac7dbd7a97a136148231d6a46ce6",
+  "organizationFindingCountReported": 31,
+  "originalFindingIdsAndTracesAvailable": false,
+  "originalFindingsIndividuallyClosed": null,
+  "remediationKitAvailable": false,
+  "finalVerificationRecord": "Annotated security-semgrep-2026-11-02 tag and merged PR #2 description record the exact final dev commit and workflow results.",
+  "productionJavaFilesChanged": [
+    "server/skillhub-app/src/main/java/com/iflytek/skillhub/bootstrap/BuiltinSkillRemotePackageDownloader.java",
+    "server/skillhub-app/src/main/java/com/iflytek/skillhub/bootstrap/InitialAuthSettingsInitializer.java",
+    "server/skillhub-app/src/main/java/com/iflytek/skillhub/ratelimit/AnonymousDownloadIdentityService.java",
+    "server/skillhub-app/src/main/java/com/iflytek/skillhub/repository/GithubSyncWorkerPresenceRepository.java",
+    "server/skillhub-app/src/main/java/com/iflytek/skillhub/stream/ScanTaskConsumer.java",
+    "server/skillhub-domain/src/main/java/com/iflytek/skillhub/domain/security/SecurityScanService.java",
+    "server/skillhub-domain/src/main/java/com/iflytek/skillhub/domain/skill/validation/SkillPackagePolicy.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubOfficialDiscoveryRepository.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncCapacityGate.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncHistoryRepository.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncPathPresenceRepository.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncSchedulePolicyRepository.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncTaskRepository.java",
+    "server/skillhub-infra/src/main/java/com/iflytek/skillhub/infra/jpa/JdbcGithubSyncUploadRepository.java"
+  ],
+  "java": {
+    "reported": 2767,
+    "passed": 2737,
+    "failures": 0,
+    "errors": 0,
+    "conditionalSkips": 30,
+    "newSymlinkTestsSkipped": 0,
+    "runs": [
+      41453316274,
+      41453316222
+    ]
+  },
+  "go": {
+    "commands": [
+      "go test -count=1 ./...",
+      "go vet ./..."
+    ],
+    "packagesPassed": 5,
+    "run": 41453316481,
+    "liveNetworkTestsEnabled": false
+  },
+  "e2e": {
+    "passed": 182,
+    "skipped": 3,
+    "run": 41453316223
+  },
+  "semgrep": {
+    "version": "1.181.1",
+    "imageDigest": "sha256:3db5c7af55eb1f512eac0abf0ab69a97b52c74b5e9a27314c221aee1a78d7ab2",
+    "officialRulesCommit": "16b9e6d45f10649f6a531ec4838ed9924372c3bc",
+    "expectedPrimaryFiles": 1666,
+    "expectedProductionJavaFiles": 1283,
+    "expectedGoFilesIncludingTests": 61,
+    "integrationRun": 41453316300,
+    "finalEmissionNativeCookieRules": 3,
+    "finalEmissionNativeCookieFindings": 0,
+    "integrationNote": "The integration scan retained one cookie-constructor audit warning caused by security flags in a caller. Final cookie creation/configuration/emission is unified in one private method and its three native pinned cookie rules pass; final full dev reports are retained in the tag/PR."
+  },
+  "nativeGoEightPacks": {
+    "rules": 144,
+    "targets": 65,
+    "goFilesCovered": 61,
+    "findings": 6,
+    "warnings": 6,
+    "errorsOrHigherFindings": 0,
+    "requestedTreeFixtureFindings": 0,
+    "diagnostics": [
+      {
+        "path": "github-sync-go/Dockerfile",
+        "reason": "Windows CRLF embedded-shell partial parsing; not a Go source error"
+      }
+    ]
+  },
+  "criticalArtifacts": [
+    {
+      "name": "frontend-critical.json",
+      "packageEntries": 737,
+      "criticalFindings": 0,
+      "sha256": "edc5a6fb89384fd9c43d8557efaf9c64b03d0cc800146ad922a7a92b0702f9e5"
+    },
+    {
+      "name": "java-critical.json",
+      "packageEntries": 347,
+      "criticalFindings": 0,
+      "sha256": "00eb887d70e815184652f9d8845c188774b43d8bc59d2f4158829cc265d82df1"
+    }
+  ],
+  "codeqlRun": 41453316314,
+  "dependencyReview": {
+    "run": 41453316235,
+    "status": "unsupported repository feature; not counted as passed; dependency manifests unchanged"
+  }
+}
