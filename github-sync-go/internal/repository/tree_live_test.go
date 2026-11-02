@@ -69,6 +69,40 @@ func TestAnonymousLiveTreeDoesNotLoadCredentials(t *testing.T) {
 	}
 }
 
+func boundedArchiveDigest(reader io.Reader, expectedSize int64) (int64, string, error) {
+	digest := sha256.New()
+	count, err := io.CopyN(digest, reader, expectedSize+1)
+	if errors.Is(err, io.EOF) {
+		err = nil
+	}
+	return count, hex.EncodeToString(digest.Sum(nil)), err
+}
+
+func TestArchiveDigestReadsAtMostOneByteBeyondExpectedSize(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		contents string
+		size     int64
+		wantRead int
+	}{
+		{name: "exact", contents: "archive", size: 7, wantRead: 7},
+		{name: "oversized", contents: strings.Repeat("x", 100), size: 7, wantRead: 8},
+		{name: "truncated", contents: "zip", size: 7, wantRead: 3},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			reader := strings.NewReader(test.contents)
+			count, digest, err := boundedArchiveDigest(reader, test.size)
+			if err != nil || count != int64(test.wantRead) || reader.Len() != len(test.contents)-test.wantRead {
+				t.Fatalf("unexpected bounded read: count=%d remaining=%d error=%v", count, reader.Len(), err)
+			}
+			expected := sha256.Sum256([]byte(test.contents[:test.wantRead]))
+			if digest != hex.EncodeToString(expected[:]) {
+				t.Fatal("archive fingerprint differs from the bounded content")
+			}
+		})
+	}
+}
+
 func loadFixedPublicTree(t *testing.T, ctx context.Context) (TreeSnapshot, int) {
 	t.Helper()
 	token, err := liveTreeToken(os.Getenv)
@@ -264,11 +298,10 @@ func TestLiveAcquireAllFixedPublicSkillsSequentially(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read package %s: %v", plan.Root, err)
 			}
-			digest := sha256.New()
-			storedBytes, copyErr := io.Copy(digest, stored)
+			storedBytes, digest, copyErr := boundedArchiveDigest(stored, artifact.Size)
 			closeErr := stored.Close()
 			if copyErr != nil || closeErr != nil || storedBytes != artifact.Size ||
-				hex.EncodeToString(digest.Sum(nil)) != artifact.SHA256 {
+				digest != artifact.SHA256 {
 				t.Fatalf("package %s archive size or digest mismatch: copy=%v close=%v",
 					plan.Root, copyErr, closeErr)
 			}
