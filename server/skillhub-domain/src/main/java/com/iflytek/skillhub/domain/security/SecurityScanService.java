@@ -7,6 +7,7 @@ import com.iflytek.skillhub.domain.skill.SkillVersion;
 import com.iflytek.skillhub.domain.skill.SkillVersionRepository;
 import com.iflytek.skillhub.domain.skill.SkillVersionStatus;
 import com.iflytek.skillhub.domain.skill.validation.PackageEntry;
+import com.iflytek.skillhub.domain.skill.validation.SkillPackagePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,8 +124,8 @@ public class SecurityScanService {
 
         String packagePath = null;
         String bundleKey = null;
+        validateUploadEntries(entries);
         if ("upload".equalsIgnoreCase(scanMode)) {
-            validateUploadEntries(entries);
             bundleKey = buildBundleStorageKey(version.getSkillId(), versionId);
         } else {
             packagePath = saveTempDirectory(versionId, entries).toString();
@@ -231,6 +232,7 @@ public class SecurityScanService {
     private Path saveTempDirectory(Long versionId, List<PackageEntry> entries) {
         try {
             Path skillDir = TEMP_BASE_DIR.resolve(String.valueOf(versionId)).normalize();
+            rejectSymbolicLinks(skillDir);
             Files.createDirectories(skillDir);
             for (PackageEntry entry : entries) {
                 Path filePath = resolveSafeChild(skillDir, entry.path());
@@ -268,23 +270,29 @@ public class SecurityScanService {
     }
 
     private Path resolveSafeChild(Path baseDir, String entryPath) {
-        Path resolved = baseDir.resolve(entryPath).normalize();
+        Path resolved = baseDir.resolve(safeZipEntryName(entryPath)).normalize();
         if (!resolved.startsWith(baseDir)) {
             throw new IllegalStateException("Unsafe scan path: " + entryPath);
         }
+        rejectSymbolicLinks(resolved);
         return resolved;
     }
 
+    private void rejectSymbolicLinks(Path path) {
+        for (Path current = path; current != null && current.startsWith(TEMP_BASE_DIR);
+                current = current.getParent()) {
+            if (Files.isSymbolicLink(current)) {
+                throw new IllegalStateException("Unsafe scan path");
+            }
+        }
+    }
+
     private String safeZipEntryName(String entryPath) {
-        Path normalized = Paths.get(entryPath).normalize();
-        if (normalized.isAbsolute() || normalized.startsWith("..")) {
-            throw new IllegalStateException("Unsafe scan path: " + entryPath);
+        try {
+            return SkillPackagePolicy.normalizeEntryPath(entryPath);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException("Unsafe scan path: " + entryPath, exception);
         }
-        String safePath = normalized.toString().replace('\\', '/');
-        if (safePath.isBlank() || safePath.startsWith("../")) {
-            throw new IllegalStateException("Unsafe scan path: " + entryPath);
-        }
-        return safePath;
     }
 
     /**

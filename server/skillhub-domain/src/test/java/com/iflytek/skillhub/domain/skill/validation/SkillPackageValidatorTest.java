@@ -49,6 +49,16 @@ class SkillPackageValidatorTest {
     }
 
     @Test
+    void rejectsTraversalAndDrivePrefixesWithEitherSeparator() {
+        for (String path : List.of("../escape.txt", "..\\escape.txt", "/absolute.txt",
+                "C:/escape.txt", "C:\\escape.txt", "//host/share/file.txt",
+                "nested/../escape.txt", "nested\\..\\escape.txt")) {
+            assertThrows(IllegalArgumentException.class, () -> SkillPackagePolicy.normalizeEntryPath(path), path);
+        }
+        assertEquals("nested/file.txt", SkillPackagePolicy.normalizeEntryPath("nested\\file.txt"));
+    }
+
+    @Test
     void acceptsSkillMdFilenameWithDifferentCase() {
         String skillMdContent = """
             ---

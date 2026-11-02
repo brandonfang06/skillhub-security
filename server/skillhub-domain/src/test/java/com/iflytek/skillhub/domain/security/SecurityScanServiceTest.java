@@ -8,6 +8,8 @@ import com.iflytek.skillhub.domain.skill.validation.PackageEntry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -17,6 +19,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -264,6 +267,81 @@ class SecurityScanServiceTest {
         assertThatThrownBy(() -> service.triggerScan(42L, List.of(entry), "publisher-1"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unsafe scan path");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "local, '..\\escape.txt'",
+            "upload, '..\\escape.txt'",
+            "local, 'nested\\..\\..\\escape.txt'",
+            "upload, 'nested\\..\\..\\escape.txt'",
+            "local, 'C:/escape.txt'",
+            "upload, 'C:/escape.txt'",
+            "local, 'nested/../escape.txt'",
+            "upload, 'nested/../escape.txt'"
+    })
+    void triggerScan_rejectsNonPortablePathsBeforePublishing(String mode, String path) throws Exception {
+        service = new SecurityScanService(auditRepository, skillVersionRepository,
+                scanTaskProducer, new ObjectMapper(), mode, true);
+        SkillVersion version = new SkillVersion(8L, "1.0.0", "publisher-1");
+        setId(version, 42L);
+        given(skillVersionRepository.findById(42L)).willReturn(Optional.of(version));
+        PackageEntry entry = new PackageEntry(path, new byte[] {1}, 1L, "text/plain");
+
+        assertThatThrownBy(() -> service.triggerScan(42L, List.of(entry), "publisher-1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unsafe scan path");
+        verify(auditRepository, never()).save(any());
+        verify(scanTaskProducer, never()).publishScanTask(any());
+        verify(skillVersionRepository, never()).save(any());
+    }
+
+    @Test
+    void triggerScan_rejectsSymbolicLinkParentBeforeWritingOutsideWorkspace() throws Exception {
+        Path root = Path.of("/tmp/skillhub-scans").toAbsolutePath().normalize();
+        Files.createDirectories(root);
+        long versionId = java.util.concurrent.ThreadLocalRandom.current().nextLong(1_000_000, Long.MAX_VALUE);
+        Path owned = Files.createDirectory(root.resolve(Long.toString(versionId)));
+        Path outside = Files.createTempDirectory("scan-write-outside-");
+        Path link = owned.resolve("alias");
+        try {
+            try {
+                Files.createSymbolicLink(link, outside);
+            } catch (UnsupportedOperationException | java.nio.file.FileSystemException exception) {
+                org.junit.jupiter.api.Assumptions.abort("Symbolic links unavailable: " + exception.getClass().getSimpleName());
+            }
+            SkillVersion version = new SkillVersion(8L, "1.0.0", "publisher-1");
+            setId(version, versionId);
+            given(skillVersionRepository.findById(versionId)).willReturn(Optional.of(version));
+            var entry = new PackageEntry("alias/escape.txt", new byte[] {1}, 1L, "text/plain");
+
+            assertThatThrownBy(() -> service.triggerScan(versionId, List.of(entry), "publisher-1"))
+                    .isInstanceOf(IllegalStateException.class).hasMessageContaining("Unsafe scan path");
+            assertThat(outside.resolve("escape.txt")).doesNotExist();
+            verify(auditRepository, never()).save(any());
+            verify(scanTaskProducer, never()).publishScanTask(any());
+        } finally {
+            Files.deleteIfExists(link);
+            Files.delete(owned);
+            Files.deleteIfExists(outside.resolve("escape.txt"));
+            Files.delete(outside);
+        }
+    }
+
+    @Test
+    void triggerScan_validatesAllPathsBeforeOpeningAnyContent() throws Exception {
+        SkillVersion version = new SkillVersion(8L, "1.0.0", "publisher-1");
+        setId(version, 42L);
+        given(skillVersionRepository.findById(42L)).willReturn(Optional.of(version));
+        PackageEntry first = PackageEntry.streaming("safe.txt", 1L, "text/plain", () -> {
+            throw new AssertionError("Content opened before all paths were validated");
+        });
+        PackageEntry invalid = new PackageEntry("../escape.txt", new byte[] {1}, 1L, "text/plain");
+
+        assertThatThrownBy(() -> service.triggerScan(42L, List.of(first, invalid), "publisher-1"))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("Unsafe scan path");
+        verify(auditRepository, never()).save(any());
+        verify(scanTaskProducer, never()).publishScanTask(any());
     }
 
     @Test

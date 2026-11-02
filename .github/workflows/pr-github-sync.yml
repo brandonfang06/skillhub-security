@@ -1,6 +1,7 @@
 name: PR GitHub Sync
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'github-sync-go/**'
