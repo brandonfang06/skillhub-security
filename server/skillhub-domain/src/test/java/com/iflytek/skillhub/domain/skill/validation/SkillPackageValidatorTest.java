@@ -59,6 +59,17 @@ class SkillPackageValidatorTest {
     }
 
     @Test
+    void rejectsPortableFilesystemAliasesBeforeExtraction() {
+        for (String path : List.of("NUL.txt", "nested/con.md", "AUX", "COM1.txt", "LPT\u00b9.log",
+                "dir./file.txt", "dir /file.txt", "file.txt ", " file.txt", "dir//file.txt",
+                "dir/./file.txt", "dir/file\u0001.txt", "file?.txt")) {
+            assertThrows(IllegalArgumentException.class, () -> SkillPackagePolicy.normalizeEntryPath(path), path);
+        }
+        assertEquals("\u8cc7\u6599/\u7bc4\u4f8b.md", SkillPackagePolicy.normalizeEntryPath("\u8cc7\u6599/\u7bc4\u4f8b.md"));
+        assertEquals("console.md", SkillPackagePolicy.normalizeEntryPath("console.md"));
+    }
+
+    @Test
     void acceptsSkillMdFilenameWithDifferentCase() {
         String skillMdContent = """
             ---

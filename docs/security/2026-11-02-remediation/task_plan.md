@@ -8,3 +8,12 @@ Target: brandonfang06/skillhub-security dev. Baseline 8c9c085659a412f61f64621e98
 4. PR #1 merged as 0a2afafccefc2144f0e74c82fad3ba3b8099ddd1. This evidence-only checkpoint precedes final exact-dev reruns and tagging. The annotated security-semgrep-2026-11-02 tag is the final completion record: it must include the exact dev SHA and successful CI links, then its peeled remote SHA must be verified.
 
 No unreviewed kit executed; no suppressions, dependency downgrades, generated-file edits, forced pushes, tag replacement, releases or deployment. Public acceptance does not establish organization acceptance.
+
+## Expanded requested-CWE remediation
+
+User explicitly requires changes across CWE-176, CWE-22, CWE-89, CWE-601 and CWE-259 in all named source files, including Github Sync/Official JDBC adapters, worker presence and auth initializer. The requested annotated tag has NOT been created and stays pending the expanded scope.
+
+1. Inventory all SQL assembly/statement callbacks in the named adapters and credential/header/host/path boundaries; select explicit constant-SQL, bound-parameter and typed HTTP/credential interfaces. Verify actual code and current API contracts.
+2. Add regression coverage before/alongside changes: Unicode host confusion, portable path aliases, malicious database values, array binding, cleanup transaction/locking behavior, cookie/header tampering and external-only live-test credentials. Preserve existing business semantics and Spring Boot 4/Critical versions.
+3. Run targeted Java/Go and real PostgreSQL checks on Linux, then full Java/Go, E2E and public Semgrep/CodeQL/Critical artifact gates. Record changed source sites separately from the unavailable original finding IDs; never turn source edits into an invented 31-of-31 closure claim.
+4. Merge verified expanded changes into dev, verify final exact commit and create the still-unused security-semgrep-2026-11-02 annotated tag.

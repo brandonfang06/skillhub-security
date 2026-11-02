@@ -14,7 +14,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +31,8 @@ public class BuiltinSkillRemotePackageDownloader {
     static final String ALLOWED_HOST = "bjcdn.openstorage.cn";
 
     private static final Logger log = LoggerFactory.getLogger(BuiltinSkillRemotePackageDownloader.class);
-    private static final Pattern IPV4_LITERAL = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3}");
+    private static final Pattern ALLOWED_HOST_PATTERN = Pattern.compile(
+            "(?:[a-z0-9-]+\\.)*" + Pattern.quote(ALLOWED_HOST), Pattern.CASE_INSENSITIVE);
 
     private final long maxPackageSize;
     private final HttpClient httpClient;
@@ -116,11 +116,7 @@ public class BuiltinSkillRemotePackageDownloader {
         if (host == null) {
             return false;
         }
-        String normalizedHost = host.toLowerCase(Locale.ROOT);
-        if (isDisallowedHostLiteral(normalizedHost)) {
-            return false;
-        }
-        return normalizedHost.equals(ALLOWED_HOST) || normalizedHost.endsWith("." + ALLOWED_HOST);
+        return ALLOWED_HOST_PATTERN.matcher(host).matches();
     }
 
     private Optional<byte[]> readBounded(InputStream inputStream) throws IOException {
@@ -179,12 +175,6 @@ public class BuiltinSkillRemotePackageDownloader {
         } catch (IOException ignored) {
             // Best-effort cleanup after timeout/interruption.
         }
-    }
-
-    private static boolean isDisallowedHostLiteral(String host) {
-        return "localhost".equals(host)
-                || IPV4_LITERAL.matcher(host).matches()
-                || host.contains(":");
     }
 
     private static String safeUrl(URI uri) {

@@ -48,6 +48,45 @@ class GithubRepositoryHistoryCleanupTest {
     @Autowired private JdbcTemplate jdbc;
 
     @Test
+    void purgesMultipleBoundTaskIdsWithoutInterpretingQuotedPathsAsSql() {
+        Instant now = Instant.now();
+        long namespaceId = platformNamespaceId();
+        long sourceId = source(namespaceId, 950901);
+        Task first = completedTask(namespaceId, sourceId, 950901, now.minus(Duration.ofDays(92)));
+        Task second = completedTask(namespaceId, sourceId, 950901, now.minus(Duration.ofDays(91)));
+        Task current = completedTask(namespaceId, sourceId, 950901, now.minus(Duration.ofDays(1)));
+        String hostile = "skills/x'); DELETE FROM github_sync_task; --";
+        path(first.id(), hostile);
+        path(second.id(), hostile);
+        path(current.id(), hostile);
+
+        var result = new JdbcGithubSyncHistoryRepository(jdbc).purgeExpiredRepositoryDetails(
+                now.minus(Duration.ofDays(90)), now, 10);
+
+        assertThat(result.tasks()).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM github_sync_task WHERE id IN (?, ?, ?)",
+                Integer.class, first.id(), second.id(), current.id())).isEqualTo(3);
+        assertThat(jdbc.queryForList("SELECT skill_path FROM github_sync_path_result WHERE task_id = ?",
+                String.class, current.id())).containsExactly(hostile);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM github_sync_path_result WHERE task_id IN (?, ?)",
+                Integer.class, first.id(), second.id())).isZero();
+    }
+
+    @Test
+    void workerPresenceStoresQuotedIdentifiersAndArrayElementsAsData() {
+        String worker = "worker'); DELETE FROM github_sync_task; --";
+        var capabilities = java.util.List.of("capability'{};--", "normal");
+
+        new GithubSyncWorkerPresenceRepository(jdbc).heartbeat(worker, 1, capabilities);
+
+        assertThat(jdbc.queryForObject("SELECT worker_id FROM github_sync_worker_instance WHERE worker_id = ?",
+                String.class, worker)).isEqualTo(worker);
+        assertThat(jdbc.queryForList("SELECT unnest(capabilities) FROM github_sync_worker_instance WHERE worker_id = ?",
+                String.class, worker)).containsExactlyElementsOf(capabilities);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM github_sync_task", Long.class)).isNotNull();
+    }
+
+    @Test
     void sourceAndRunSummariesShowCurrentPackageFailureAfterAcquisitionCompletes() {
         long namespaceId = platformNamespaceId();
         long sourceId = source(namespaceId, 950003);

@@ -15,6 +15,23 @@ import java.util.UUID;
 
 @Repository
 public class JdbcGithubSyncUploadRepository implements GithubSyncUploadRepository {
+    private static final String READ_REPORT_SQL = """
+                SELECT admission.status AS admission_status, upload.status AS upload_status,
+                       upload.mode, upload.object_key, upload.size_bytes, upload.sha256 AS upload_sha256,
+                       ingestion.id AS ingestion_id, ingestion.size_bytes AS ingestion_size,
+                       ingestion.sha256 AS ingestion_sha256
+                FROM github_sync_package_admission admission
+                JOIN github_sync_task task ON task.id = admission.task_id
+                JOIN github_sync_staged_upload upload ON upload.admission_id = admission.id
+                LEFT JOIN github_sync_package_ingestion ingestion
+                  ON ingestion.task_id = task.id AND ingestion.commit_sha = admission.commit_sha
+                 AND ingestion.skill_path = admission.skill_path
+                WHERE admission.id = ? AND admission.task_id = ? AND admission.lease_generation = ?
+                  AND admission.commit_sha = ? AND admission.skill_path = ? AND upload.id = ?
+                  AND task.status = 'LEASED' AND task.lease_generation = ?
+                  AND task.lease_token_hash = ? AND task.lease_expires_at > ?
+                """;
+    private static final String LOCKED_READ_REPORT_SQL = READ_REPORT_SQL + " FOR UPDATE OF task, admission, upload";
     private final JdbcTemplate jdbc;
 
     public JdbcGithubSyncUploadRepository(JdbcTemplate jdbc) {
@@ -210,38 +227,15 @@ public class JdbcGithubSyncUploadRepository implements GithubSyncUploadRepositor
     private GithubPackageReportResult readReport(UUID taskId, long generation, String leaseTokenHash,
             UUID admissionId, String commitSha, String skillPath, UUID uploadId,
             long sizeBytes, String sha256, Instant now, boolean lock) {
-        String sql = """
-                SELECT admission.status AS admission_status, upload.status AS upload_status,
-                       upload.mode, upload.object_key, upload.size_bytes, upload.sha256 AS upload_sha256,
-                       ingestion.id AS ingestion_id, ingestion.size_bytes AS ingestion_size,
-                       ingestion.sha256 AS ingestion_sha256
-                FROM github_sync_package_admission admission
-                JOIN github_sync_task task ON task.id = admission.task_id
-                JOIN github_sync_staged_upload upload ON upload.admission_id = admission.id
-                LEFT JOIN github_sync_package_ingestion ingestion
-                  ON ingestion.task_id = task.id AND ingestion.commit_sha = admission.commit_sha
-                 AND ingestion.skill_path = admission.skill_path
-                WHERE admission.id = ? AND admission.task_id = ? AND admission.lease_generation = ?
-                  AND admission.commit_sha = ? AND admission.skill_path = ? AND upload.id = ?
-                  AND task.status = 'LEASED' AND task.lease_generation = ?
-                  AND task.lease_token_hash = ? AND task.lease_expires_at > ?
-                """ + (lock ? " FOR UPDATE OF task, admission, upload" : "");
-        ReportRow row = jdbc.query(sql, statement -> {
-            statement.setObject(1, admissionId);
-            statement.setObject(2, taskId);
-            statement.setLong(3, generation);
-            statement.setString(4, commitSha);
-            statement.setString(5, skillPath);
-            statement.setObject(6, uploadId);
-            statement.setLong(7, generation);
-            statement.setString(8, leaseTokenHash);
-            statement.setTimestamp(9, Timestamp.from(now));
-        }, result -> result.next() ? new ReportRow(
+        ReportRow row = jdbc.query(lock ? LOCKED_READ_REPORT_SQL : READ_REPORT_SQL,
+                result -> result.next() ? new ReportRow(
                 result.getString("admission_status"), result.getString("upload_status"),
                 result.getString("mode"), result.getString("object_key"),
                 result.getLong("size_bytes"), result.getString("upload_sha256"),
                 result.getObject("ingestion_id", UUID.class),
-                (Long) result.getObject("ingestion_size"), result.getString("ingestion_sha256")) : null);
+                (Long) result.getObject("ingestion_size"), result.getString("ingestion_sha256")) : null,
+                admissionId, taskId, generation, commitSha, skillPath, uploadId, generation,
+                leaseTokenHash, Timestamp.from(now));
         if (row == null) {
             return GithubPackageReportResult.rejected(GithubPackageReportResult.Status.LEASE_STALE);
         }

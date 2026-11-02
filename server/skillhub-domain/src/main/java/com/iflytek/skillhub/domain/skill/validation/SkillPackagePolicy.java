@@ -1,7 +1,5 @@
 package com.iflytek.skillhub.domain.skill.validation;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -9,12 +7,16 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * Shared package-policy rules for path normalization, extension allowlists, and lightweight file
  * signature validation.
  */
 public final class SkillPackagePolicy {
+
+    private static final Pattern DEVICE_NAME = Pattern.compile(
+            "(?:CON|PRN|AUX|NUL|COM[1-9\u00b9\u00b2\u00b3]|LPT[1-9\u00b9\u00b2\u00b3])(?:\\..*)?", Pattern.CASE_INSENSITIVE);
 
     public static final int MAX_FILE_COUNT = 500;
     public static final long MAX_SINGLE_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -44,7 +46,7 @@ public final class SkillPackagePolicy {
             throw new IllegalArgumentException("Package entry path is missing");
         }
 
-        String sanitized = rawPath.replace('\\', '/').trim();
+        String sanitized = rawPath.replace('\\', '/');
         if (sanitized.isEmpty()) {
             throw new IllegalArgumentException("Package entry path is empty");
         }
@@ -55,25 +57,25 @@ public final class SkillPackagePolicy {
             throw new IllegalArgumentException("Package entry path contains an invalid drive or scheme prefix: " + rawPath);
         }
 
-        Path normalized = Paths.get(sanitized).normalize();
-        String canonical = normalized.toString().replace('\\', '/');
-        if (normalized.isAbsolute() || canonical.isBlank()) {
-            throw new IllegalArgumentException("Package entry path is invalid: " + rawPath);
+        // Package names must have the same meaning on the scanner and downstream clients.
+        for (String segment : sanitized.split("/", -1)) {
+            if (segment.equals("..")) {
+                throw new IllegalArgumentException("Package entry path escapes package root: " + rawPath);
+            }
+            if (segment.isEmpty() || segment.equals(".")
+                    || !segment.equals(segment.strip())) {
+                throw new IllegalArgumentException("Package entry path must be normalized: " + rawPath);
+            }
         }
-        if (canonical.equals(".") || canonical.equals("..") || canonical.startsWith("../")) {
-            throw new IllegalArgumentException("Package entry path escapes package root: " + rawPath);
-        }
-        if (!sanitized.equals(canonical)) {
-            throw new IllegalArgumentException("Package entry path must be normalized: " + rawPath);
-        }
-
-        return canonicalizeSkillMdPath(canonical);
+        portableEntryKey(sanitized);
+        return canonicalizeSkillMdPath(sanitized);
     }
 
     /** Reject Windows aliases before accepting a portable author file path. */
     public static String portableEntryKey(String normalizedPath) {
         for (String segment : normalizedPath.split("/")) {
-            if (segment.endsWith(".") || segment.endsWith(" ")
+            if (segment.endsWith(".") || segment.endsWith(" ") || DEVICE_NAME.matcher(segment).matches()
+                    || segment.chars().anyMatch(value -> "<>\"|?*".indexOf(value) >= 0)
                     || segment.chars().anyMatch(value -> value < 32 || value == 127)) {
                 throw new IllegalArgumentException("Package entry path has a non-portable alias: " + normalizedPath);
             }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iflytek.skillhub.githubsync.GithubOfficialDiscoveryCatalog;
 import com.iflytek.skillhub.githubsync.GithubOfficialDiscoveryRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.SqlArrayValue;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -140,25 +141,15 @@ public class JdbcGithubOfficialDiscoveryRepository implements GithubOfficialDisc
                         INSERT INTO github_sync_run (id, namespace_id, kind, status, created_at)
                         VALUES (?, ?, 'DISCOVERY', 'QUEUED', ?)
                         """, runId, configuration.namespaceId(), Timestamp.from(now));
-                jdbc.update(connection -> {
-                    var statement = connection.prepareStatement("""
+                jdbc.update("""
                             INSERT INTO github_sync_task
                                 (id, run_id, namespace_id, kind, status, dedupe_key, priority, snapshot_json,
                                  due_at, created_at, updated_at, required_capabilities, official_query_id)
                             VALUES (?, ?, ?, 'DISCOVERY', 'QUEUED', ?, 10, ?::jsonb, ?, ?, ?, ?, ?)
-                            """);
-                    statement.setObject(1, taskId);
-                    statement.setObject(2, runId);
-                    statement.setLong(3, configuration.namespaceId());
-                    statement.setString(4, "official-discovery:" + progress.id());
-                    statement.setString(5, snapshot.toString());
-                    statement.setTimestamp(6, Timestamp.from(now));
-                    statement.setTimestamp(7, Timestamp.from(now));
-                    statement.setTimestamp(8, Timestamp.from(now));
-                    statement.setArray(9, connection.createArrayOf("text", capabilities.toArray()));
-                    statement.setObject(10, progress.id());
-                    return statement;
-                });
+                            """, taskId, runId, configuration.namespaceId(),
+                        "official-discovery:" + progress.id(), snapshot.toString(),
+                        Timestamp.from(now), Timestamp.from(now), Timestamp.from(now),
+                        new SqlArrayValue("text", capabilities.toArray()), progress.id());
                 jdbc.update("UPDATE github_sync_task SET lease_generation = ? WHERE id = ?", work.generation(), taskId);
             }
             jdbc.update("UPDATE github_sync_task SET discovery_checkpoint = ? WHERE id = ?", work.checkpoint(), taskId);
@@ -205,16 +196,10 @@ public class JdbcGithubOfficialDiscoveryRepository implements GithubOfficialDisc
                       AND (strategy_version IS DISTINCT FROM ? OR definition_json <> ?::jsonb OR retired_at IS NOT NULL)
                     """, GithubOfficialDiscoveryCatalog.VERSION, json, id, GithubOfficialDiscoveryCatalog.VERSION, json);
         }
-        jdbc.update(connection -> {
-            var statement = connection.prepareStatement("""
+        jdbc.update("""
                     UPDATE github_deep_discovery_query SET retired_at = ?
                     WHERE namespace_id = ? AND query_source = 'CATALOG' AND retired_at IS NULL AND NOT (id = ANY (?))
-                    """);
-            statement.setTimestamp(1, Timestamp.from(now));
-            statement.setLong(2, namespaceId);
-            statement.setArray(3, connection.createArrayOf("uuid", current.toArray()));
-            return statement;
-        });
+                    """, Timestamp.from(now), namespaceId, new SqlArrayValue("uuid", current.toArray()));
         jdbc.update("UPDATE github_deep_discovery_config SET strategy_version = ?, strategy_generation = ? "
                 + "WHERE id = TRUE AND strategy_generation < ?", GithubOfficialDiscoveryCatalog.VERSION,
                 GithubOfficialDiscoveryCatalog.GENERATION, GithubOfficialDiscoveryCatalog.GENERATION);
