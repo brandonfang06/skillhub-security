@@ -16,9 +16,57 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.redisson.api.RedissonClient;
 
 class ScanTaskConsumerPathSafetyTest {
+
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void completionDoesNotDeleteOutsideFilesWhenAParentIsReplacedAfterValidation() throws Exception {
+        Path root = Path.of("/tmp/skillhub-scans").toAbsolutePath().normalize();
+        Files.createDirectories(root);
+        Path parent = Files.createTempDirectory(root, "scan-cleanup-race-");
+        Path moved = parent.resolveSibling(parent.getFileName() + "-moved");
+        Path target = Files.createDirectory(parent.resolve("task"));
+        Files.writeString(target.resolve("keep.txt"), "owned");
+        Path outside = Files.createTempDirectory("scan-cleanup-race-outside-");
+        Path sentinel = Files.writeString(Files.createDirectory(outside.resolve("task")).resolve("keep.txt"), "outside");
+        var raceInjected = new java.util.concurrent.atomic.AtomicBoolean();
+        var consumer = consumer();
+        try {
+            // Inject the same filesystem replacement at the first post-validation I/O boundary.
+            try (var fileSystem = org.mockito.Mockito.mockStatic(Files.class, invocation -> {
+                boolean pathnameOperation = invocation.getMethod().getName().equals("isDirectory")
+                        && target.equals(invocation.getArgument(0));
+                boolean handleOperation = invocation.getMethod().getName().equals("newDirectoryStream")
+                        && target.getRoot().equals(invocation.getArgument(0));
+                if ((pathnameOperation || handleOperation) && raceInjected.compareAndSet(false, true)) {
+                    Files.move(parent, moved);
+                    Files.createSymbolicLink(parent, outside);
+                }
+                return invocation.callRealMethod();
+            })) {
+                consumer.markCompleted(new ScanTaskConsumer.ScanTaskPayload(
+                        "task-cleanup-race", 42L, target.toString(), null, ScannerType.SKILL_SCANNER));
+            }
+            assertThat(raceInjected.get()).isTrue();
+            assertThat(Files.readString(sentinel)).isEqualTo("outside");
+        } finally {
+            if (Files.isSymbolicLink(parent)) {
+                Files.delete(parent);
+            }
+            for (Path owned : java.util.List.of(parent, moved)) {
+                Files.deleteIfExists(owned.resolve("task/keep.txt"));
+                Files.deleteIfExists(owned.resolve("task"));
+                Files.deleteIfExists(owned);
+            }
+            Files.deleteIfExists(sentinel);
+            Files.deleteIfExists(outside.resolve("task"));
+            Files.deleteIfExists(outside);
+        }
+    }
 
     @Test
     void completionRemovesOnlyItsNestedTreeAndNeverFollowsDescendantLinks() throws Exception {
