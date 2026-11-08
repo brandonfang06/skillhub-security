@@ -45,6 +45,7 @@ Run from the repository root using Java 21 (local Windows uses the existing JBR 
 | `server/mvnw.cmd -f server/pom.xml -B -pl skillhub-domain -am -Dtest=SecurityScanServiceTest#triggerScan_rejectsDuplicatePortableEntryNamesBeforeReadingContent -Dsurefire.failIfNoSpecifiedTests=false test` before fix | Both local/upload cases failed: content opened or duplicate package accepted. |
 | `server/mvnw.cmd -f server/pom.xml -B -pl skillhub-app -am -Dtest=SecurityScanServiceTest,SkillWebUrlsTest,SkillWebUrlControllerTest,InitialAuthSettingsInitializerTest,ScanTaskConsumerTest,ScanTaskConsumerPathSafetyTest -Dsurefire.failIfNoSpecifiedTests=false test` after fixes | **60 reported, 57 passed, 3 Windows symlink-permission skips, zero failures/errors.** Linux must run the symlink cases without skips. |
 | `python scripts/tests/source-security-gate-test.py` | **13 passed**; primary coverage/findings/analysis gate remains unchanged. |
+| `python scripts/tests/workflow-shell-inputs-test.py` on Windows | Eight temporary-directory sharing/cleanup errors; not passed. The existing Linux Semgrep CI runs the same shell-input checks successfully. No assertion or shell test was weakened. |
 | `docker version --format '{{json .Server.Version}}'` | Failed locally: Docker Desktop Linux-engine named pipe absent. No Docker/data reset performed. Real PostgreSQL and Linux filesystem verification move to GitHub-hosted CI. |
 | `git diff --check` | Passed. Prior dependency versions/locks and generated sources remain unchanged. |
 

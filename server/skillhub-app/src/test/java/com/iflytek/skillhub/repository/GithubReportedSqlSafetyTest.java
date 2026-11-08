@@ -39,7 +39,7 @@ class GithubReportedSqlSafetyTest {
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
         String label = "reader'); DROP TABLE github_system_credential; --";
-        String fingerprint = UUID.randomUUID().toString();
+        String fingerprint = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
         credentials.create(new GithubSystemCredential(id, label, fingerprint, "v1", new byte[12],
                 new byte[17], "ACTIVE", null, null, now, now));
 

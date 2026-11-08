@@ -20,3 +20,5 @@ Investigate the user's reported 12 remaining sites on skillhub-security/dev only
 - Docker Desktop Linux engine pipe is unavailable locally. Do not reset Docker or user data; run real PostgreSQL/Linux regressions on the existing GitHub-hosted CI.
 - First E2E run 42473763199 stopped before product tests: ubuntu-latest supplied Ubuntu 26.04, unsupported by pinned Playwright 1.58.2. Pin only the E2E runner to supported Ubuntu 24.04; rerun current source without upgrading application dependencies.
 - Optional javap bytecode inspection is unavailable in the bundled JBR (no executable or jdk.jdeps module). Source constant-expression review and actual PostgreSQL API regressions remain the evidence; no bytecode claim is made.
+- Schema review found the new random credential fixture must fit fingerprint CHAR(16); use 16 random hex digits rather than the full UUID. No production schema or security logic is changed for test data.
+- Native workflow-shell-inputs-test.py failed with eight Windows temporary-directory sharing/cleanup errors. The Linux Semgrep workflow runs that existing script successfully; do not count the native attempt as passed or weaken the test.
