@@ -21,6 +21,11 @@ jobs:
           java-version: 21
           cache: maven
 
+      - name: Verify scan workspace regressions before the full suite
+        run: >-
+          cd server && ./mvnw -B -pl skillhub-app -am
+          -Dtest=ScanTaskConsumerPathSafetyTest -Dsurefire.failIfNoSpecifiedTests=false test
+
       - name: Set up Go for integration tests
         uses: actions/setup-go@v5
         with:
