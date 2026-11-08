@@ -37,7 +37,8 @@ class ScanTaskConsumerPathSafetyTest {
         var consumer = consumer();
         try {
             // Inject the same filesystem replacement at the first post-validation I/O boundary.
-            try (var fileSystem = org.mockito.Mockito.mockStatic(Files.class, invocation -> {
+            try (var fileSystem = org.mockito.Mockito.mockStatic(Files.class, org.mockito.Mockito.withSettings()
+                    .mockMaker(org.mockito.MockMakers.INLINE).defaultAnswer(invocation -> {
                 boolean pathnameOperation = invocation.getMethod().getName().equals("isDirectory")
                         && target.equals(invocation.getArgument(0));
                 boolean handleOperation = invocation.getMethod().getName().equals("newDirectoryStream")
@@ -47,7 +48,7 @@ class ScanTaskConsumerPathSafetyTest {
                     Files.createSymbolicLink(parent, outside);
                 }
                 return invocation.callRealMethod();
-            })) {
+            }))) {
                 consumer.markCompleted(new ScanTaskConsumer.ScanTaskPayload(
                         "task-cleanup-race", 42L, target.toString(), null, ScannerType.SKILL_SCANNER));
             }
