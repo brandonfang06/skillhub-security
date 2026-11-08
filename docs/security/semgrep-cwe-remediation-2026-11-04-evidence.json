@@ -30,33 +30,19 @@
       "blockers": [],
       "analysisErrors": [],
       "workflowDiagnostics": 40,
-      "targetMatches": [],
-      "changesAgainstFreshBaseline": [
+      "rawPositionDifferenceCount": 2,
+      "relocatedExistingFindings": [
         {
-          "state": "added",
           "rule": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
           "path": ".github/workflows/backend-tests.yml",
           "severity": "WARNING",
-          "startLine": 30,
-          "startColumn": 9,
-          "endLine": 30,
-          "endColumn": 34,
-          "codeContext": "requires login",
-          "count": 1
-        },
-        {
-          "state": "removed",
-          "rule": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
-          "path": ".github/workflows/backend-tests.yml",
-          "severity": "WARNING",
-          "startLine": 25,
-          "startColumn": 9,
-          "endLine": 25,
-          "endColumn": 34,
-          "codeContext": "requires login",
-          "count": 1
+          "beforeLine": 25,
+          "afterLine": 30,
+          "proof": "Finding spans an identical Git source block; only its line position shifted."
         }
-      ]
+      ],
+      "targetMatches": [],
+      "changesAgainstFreshBaseline": []
     },
     {
       "name": "semgrep-java.json",
@@ -74,6 +60,8 @@
       "blockers": [],
       "analysisErrors": [],
       "workflowDiagnostics": 0,
+      "rawPositionDifferenceCount": 0,
+      "relocatedExistingFindings": [],
       "targetMatches": [],
       "changesAgainstFreshBaseline": []
     }
@@ -418,5 +406,6 @@
       "originalSeverity": null,
       "companyPolicyAcceptance": "unverified"
     }
-  ]
+  ],
+  "semgrepComparisonMethod": "Compare rule/path/severity/start/end positions, retaining raw position differences. Map only identical Git source blocks to the baseline to distinguish relocation from changed code. One existing setup-go@v5 warning moved line 25 to 30; zero logical additions or closures."
 }
