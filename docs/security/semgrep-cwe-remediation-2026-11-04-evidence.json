@@ -1,0 +1,422 @@
+{
+  "baseline": "dadacdd4b18f97c2e48e90dd36f1e68ede4a4166",
+  "companyAcceptance": {
+    "userReportedPreviouslyFixed": 19,
+    "userReportedRemaining": 12,
+    "originalIdsRulesTracesAvailable": false,
+    "independentlyVerifiedCompanyClosures": null
+  },
+  "sourceReview": {
+    "suppliedLineGroupsReviewed": 12,
+    "currentSafeSqlGroups": 10,
+    "urlFilesystemGroupsHardened": 2
+  },
+  "semgrep": [
+    {
+      "name": "semgrep.json",
+      "version": "1.181.1",
+      "sha256": "8710d61037bd1ce336cc80f896ab396585ba33ff76d8f347f592f1ddb0285374",
+      "scanned": 2989,
+      "findings": 199,
+      "severity": {
+        "INFO": 5,
+        "WARNING": 192,
+        "ERROR": 1,
+        "MEDIUM": 1
+      },
+      "diagnostics": 71,
+      "expectedPrimary": 1666,
+      "missing": [],
+      "blockers": [],
+      "analysisErrors": [],
+      "workflowDiagnostics": 40,
+      "targetMatches": [],
+      "changesAgainstFreshBaseline": [
+        {
+          "state": "added",
+          "rule": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "path": ".github/workflows/backend-tests.yml",
+          "severity": "WARNING",
+          "startLine": 30,
+          "startColumn": 9,
+          "endLine": 30,
+          "endColumn": 34,
+          "codeContext": "requires login",
+          "count": 1
+        },
+        {
+          "state": "removed",
+          "rule": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "path": ".github/workflows/backend-tests.yml",
+          "severity": "WARNING",
+          "startLine": 25,
+          "startColumn": 9,
+          "endLine": 25,
+          "endColumn": 34,
+          "codeContext": "requires login",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "semgrep-java.json",
+      "version": "1.181.1",
+      "sha256": "b7ae8ca2f42b421275a4eb4fec583c354b8c8a3ac6f64d68c8913490d1551540",
+      "scanned": 1429,
+      "findings": 4,
+      "severity": {
+        "WARNING": 2,
+        "INFO": 2
+      },
+      "diagnostics": 0,
+      "expectedPrimary": 1283,
+      "missing": [],
+      "blockers": [],
+      "analysisErrors": [],
+      "workflowDiagnostics": 0,
+      "targetMatches": [],
+      "changesAgainstFreshBaseline": []
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "java-critical.json",
+      "sha256": "e5a8e5702317d27074fe7c2d31e57a2e2b1a807deb01c7a85171a8f1c9868eb6",
+      "packageEntries": 347,
+      "critical": 0
+    },
+    {
+      "name": "frontend-critical.json",
+      "sha256": "e73a70f33bb7eb15b077e61a831779ae65f4923c13261f10b44e1c353f2dea25",
+      "packageEntries": 737,
+      "critical": 0
+    }
+  ],
+  "codeql": [
+    {
+      "language": "java",
+      "sha256": "c75b364f134973f273938bac0ab0f63f0f50425b7aca44a9f3c0bc38652ca215",
+      "baselineResults": 44,
+      "finalResults": 38,
+      "baselineModes": [
+        null
+      ],
+      "finalModes": [
+        "diff-informed"
+      ],
+      "eligibleForClosureComparison": false,
+      "securitySeverityAtLeastNine": [],
+      "added": [],
+      "removed": [
+        {
+          "rule": "java/potentially-weak-cryptographic-algorithm",
+          "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/service/GithubSyncArchiveValidator.java",
+          "count": 1
+        },
+        {
+          "rule": "java/potentially-weak-cryptographic-algorithm",
+          "path": "server/skillhub-auth/src/main/java/com/iflytek/skillhub/auth/federation/adapter/LegacyOAuthIdentityCoordinate.java",
+          "count": 1
+        },
+        {
+          "rule": "java/user-controlled-bypass",
+          "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/controller/AuthController.java",
+          "count": 2
+        },
+        {
+          "rule": "java/user-controlled-bypass",
+          "path": "server/skillhub-app/src/main/java/com/iflytek/skillhub/controller/portal/NamespaceInvitationController.java",
+          "count": 1
+        },
+        {
+          "rule": "java/user-controlled-bypass",
+          "path": "server/skillhub-auth/src/main/java/com/iflytek/skillhub/auth/token/ApiTokenAuthenticationFilter.java",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "language": "js",
+      "sha256": "6675ab80c5c5135238c745c969a587a6b8bf56829af2fed5e1f301faa3ad8f29",
+      "baselineResults": 21,
+      "finalResults": 16,
+      "baselineModes": [
+        null
+      ],
+      "finalModes": [
+        "diff-informed"
+      ],
+      "eligibleForClosureComparison": false,
+      "securitySeverityAtLeastNine": [],
+      "added": [],
+      "removed": [
+        {
+          "rule": "js/insecure-temporary-file",
+          "path": "cli/test/unit/services/skill-target-lock.test.ts",
+          "count": 4
+        },
+        {
+          "rule": "js/http-to-file-access",
+          "path": "plugins/dsh/test/integration/catalog-fixture.mjs",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "java": {
+    "reported": 2777,
+    "passed": 2747,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 30,
+    "classes": 431,
+    "targetClasses": [
+      [
+        "30",
+        "0",
+        "0",
+        "0",
+        "com.iflytek.skillhub.domain.security.SecurityScanServiceTest"
+      ],
+      [
+        "6",
+        "0",
+        "0",
+        "0",
+        "com.iflytek.skillhub.bootstrap.InitialAuthSettingsInitializerTest"
+      ],
+      [
+        "2",
+        "0",
+        "0",
+        "0",
+        "com.iflytek.skillhub.repository.GithubReportedSqlSafetyTest"
+      ],
+      [
+        "5",
+        "0",
+        "0",
+        "0",
+        "com.iflytek.skillhub.service.SkillWebUrlsTest"
+      ],
+      [
+        "5",
+        "0",
+        "0",
+        "0",
+        "com.iflytek.skillhub.stream.ScanTaskConsumerPathSafetyTest"
+      ]
+    ]
+  },
+  "verifiedSourceCommit": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+  "verificationRuns": [
+    {
+      "name": "java",
+      "id": 42475524128,
+      "conclusion": "success",
+      "headSha": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42475524128"
+    },
+    {
+      "name": "prTests",
+      "id": 42475524109,
+      "conclusion": "success",
+      "headSha": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42475524109"
+    },
+    {
+      "name": "e2e",
+      "id": 42475524144,
+      "conclusion": "success",
+      "headSha": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42475524144"
+    },
+    {
+      "name": "security",
+      "id": 42475524122,
+      "conclusion": "success",
+      "headSha": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42475524122"
+    },
+    {
+      "name": "codeql",
+      "id": 42475524099,
+      "conclusion": "success",
+      "headSha": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42475524099"
+    },
+    {
+      "name": "scripts",
+      "id": 42475524119,
+      "conclusion": "success",
+      "headSha": "b9980acf51de9e8706beb98cb6c1a4c69a66f503",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42475524119"
+    },
+    {
+      "name": "goUnchangedTree",
+      "id": 42474392037,
+      "conclusion": "success",
+      "headSha": "8584f01d461a7b7d0e3d241a02860c2057f10c30",
+      "status": "completed",
+      "url": "https://github.com/brandonfang06/skillhub-security/actions/runs/42474392037"
+    }
+  ],
+  "pullRequest": "https://github.com/brandonfang06/skillhub-security/pull/3",
+  "tagReference": "security-semgrep-2026-11-04",
+  "finalDeliveryCommit": "Resolved by the immutable annotated tag; literal final SHA and full dev scan evidence are in its annotation and PR #3.",
+  "sourceTrees": {
+    "server": "8d0b01b9e2dc9825732e05cc7b27c7ac8a54c866",
+    "web": "2b21f3afe61c9149986fe6153b2ce834c90d18e4",
+    "github-sync-go": "ed6fde718736525fb2c77921352c4f6dc570fdf7",
+    ".github": "32598d059bdef10080bd4d270bd7d66c72512db1",
+    "scripts": "05b9b00ff8e9b0ac576fd97c842b91aa0dfa6b0c",
+    "scanner": "142d84799030fdd8b7816bc20ad510eaf5fa3d8b",
+    "cli": "ff8f62105eac583f975e8e7c6f49fc294df228bc"
+  },
+  "goEvidence": {
+    "testedCommit": "8584f01d461a7b7d0e3d241a02860c2057f10c30",
+    "treeHash": "ed6fde718736525fb2c77921352c4f6dc570fdf7",
+    "candidateTreeIdentical": true,
+    "liveExternalFixturesEnabled": false
+  },
+  "e2e": {
+    "passed": 182,
+    "skipped": 3,
+    "run": 42475524144
+  },
+  "codeqlComparisonNote": "PR reports use diff-informed analysis (38 Java, 16 JS) while the fresh complete baseline is 44/21. Reductions in unchanged files are not credited as closures. Final full dev scan comparison is recorded in the annotated tag and PR.",
+  "publicSemgrepClosures": 0,
+  "nativeChecks": {
+    "focusedReported": 60,
+    "focusedPassed": 57,
+    "focusedSymlinkSkips": 3,
+    "failures": 0,
+    "errors": 0,
+    "sourceGateTestsPassed": 13,
+    "workflowShellInputCheck": "Failed with eight Windows temporary-directory sharing errors; current Linux workflow passed."
+  },
+  "earlyFilesystemRegressions": {
+    "reported": 5,
+    "passed": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "notAddedAgainToFullReactorCount": true
+  },
+  "reviewInventory": [
+    {
+      "localReviewId": "R01",
+      "suppliedLocationAndCwe": "176, SkillWebUrls.java:32",
+      "analysis": "Deployment property -> URI.toASCIIString -> generated detail URL. Reproduced NFC conversion changes distinct Unicode prefix paths. Defense-in-depth/path integrity issue; no demonstrated attacker-controlled host or open redirect. Replace implicit normalization with encoding that preserves code points and existing escapes; reject malformed UTF-16. Native red/green and malicious/legitimate URL tests pass.",
+      "currentSourceClassification": "defense_in_depth",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R02",
+      "suppliedLocationAndCwe": "22, ScanTaskConsumer.java:350 cleanupTempPath",
+      "analysis": "Queue local path -> guarded recursive deletion. Prior strict descendant/ancestor-symlink checks prevent static traversal. Add descriptor-relative NOFOLLOW_LINKS deletion where the provider supports it. Reproduced same-version scan attempts sharing/overwriting one directory; use private unique temporary directories per attempt. Reject duplicate normalized names before reads/writes. Defense-in-depth plus a confirmed attempt-isolation flaw, not a demonstrated arbitrary remote file-deletion exploit. Original trace unverified.",
+      "currentSourceClassification": "defense_in_depth",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R03",
+      "suppliedLocationAndCwe": "89, JdbcGithubSyncUploadRepository.java:230-238",
+      "analysis": "Private boolean selects one of two compile-time constant queries; UUID, generation, commit, path, token and time are separate bound arguments. Already hardened in prior delivery; current source has no untrusted SQL syntax. False positive against current code; verify existing upload/locking tests.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R04",
+      "suppliedLocationAndCwe": "89, JdbcGithubSystemCredentialRepository.java:29-30",
+      "analysis": "list(): SELECT + private static final FIELDS; all concatenated operands are compile-time literals, no user SQL. False positive.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R05",
+      "suppliedLocationAndCwe": "89, JdbcGithubSystemCredentialRepository.java:44-45",
+      "analysis": "find(UUID): constant column list/query with bound UUID. False positive.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R06",
+      "suppliedLocationAndCwe": "89, JdbcGithubSystemCredentialRepository.java:58-65",
+      "analysis": "availableForClaim: constant query, timestamp/resource bindings, strict quota-resource allowlist, FOR UPDATE SKIP LOCKED. False positive. Real PostgreSQL hostile-value/allowlist tests passed.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R07",
+      "suppliedLocationAndCwe": "89, JdbcGithubDiscoveryEntryRepository.java:42-44",
+      "analysis": "listPlatformEntries: compile-time constant column list; bound catalog namespace ID. False positive.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R08",
+      "suppliedLocationAndCwe": "89, JdbcGithubDiscoveryEntryRepository.java:49-52",
+      "analysis": "listTeamRepositories: constant SQL; bound namespace; fixed type/order. False positive.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R09",
+      "suppliedLocationAndCwe": "89, JdbcGithubDiscoveryEntryRepository.java:57-59",
+      "analysis": "findTeamRepository: constant SQL; namespace and UUID bindings; fixed repository type. False positive.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R10",
+      "suppliedLocationAndCwe": "89, JdbcGithubDiscoveryEntryRepository.java:64-69",
+      "analysis": "findPlatformEntry: constant SQL; UUID and catalog namespace bindings. False positive.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R11",
+      "suppliedLocationAndCwe": "89, JdbcGithubDiscoveryEntryRepository.java:334-335 returning helper",
+      "analysis": "Private helper receives only literal SQL concatenated with private constant COLUMNS; all values use Object... bindings. No external SQL caller. False positive. Real PostgreSQL quoted title/owner/repository/JSON and namespace isolation tests passed.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    },
+    {
+      "localReviewId": "R12",
+      "suppliedLocationAndCwe": "89, InitialAuthSettingsInitializer.java:62-70",
+      "analysis": "Fixed SELECT pg_advisory_xact_lock(?) prepared statement; fixed long bound with setLong; no external SQL input; statement closed and transaction serialization retained. Already hardened in prior delivery; current-source false positive. Existing advisory-lock regression will be rerun.",
+      "currentSourceClassification": "false_positive",
+      "originalRuleId": null,
+      "originalSeverity": null,
+      "companyPolicyAcceptance": "unverified"
+    }
+  ]
+}

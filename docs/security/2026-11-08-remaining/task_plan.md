@@ -6,8 +6,8 @@ Investigate the user's reported 12 remaining sites on skillhub-security/dev only
 ## Phases
 1. [complete] Baseline and inventory: mapped all 12 supplied line groups to current methods and flows; the report distinguishes current-source issues and false positives from unavailable company traces.
 2. [complete] Regression and remediation: URL, independent scan directories and duplicate names reproduced failures before fixes; focused native checks passed. Added actual PostgreSQL tests for the already-bound SQL groups and secure-stream Linux cleanup.
-3. [in_progress] Verification: full Java/Go and applicable E2E/SQL tests, pinned public Semgrep before/after, CodeQL and actual artifact Critical scan. Preserve raw evidence outside Git and record exact results.
-4. [pending] Delivery: review scoped diff; commit/push feature branch, integrate dev after checks, verify exact dev SHA, create/push unique annotated security-semgrep-2026-11-04 tag with explicit limits. Record final evidence without inventing original finding IDs or 31/31 closure.
+3. [complete] Verification: b9980acf full Java 2777 / 2747 passed / 30 existing skips / zero failures/errors; all new filesystem and PostgreSQL cases ran without skips. E2E 182/3, public Semgrep 199/four unchanged, artifact Critical zero, PR CodeQL passed. Go tested on an identical Go tree. Actual commands/results/hashes are in the report and structured evidence.
+4. [recorded externally] Delivery: source integrated locally into dev after checks; publication adds evidence documents only. Final remote dev scan, literal publication SHA and annotated security-semgrep-2026-11-04 tag/peel verification are recorded in the final tag and PR #3. No original company finding IDs or 31/31 closure is invented.
 
 ## Constraints
 - The user's reported 19 previous fixes and 12 remaining cases are supplied counts, not independently reproduced scanner closures.
