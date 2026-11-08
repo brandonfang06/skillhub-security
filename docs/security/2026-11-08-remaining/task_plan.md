@@ -5,8 +5,8 @@ Investigate the user's reported 12 remaining sites on skillhub-security/dev only
 
 ## Phases
 1. [complete] Baseline and inventory: mapped all 12 supplied line groups to current methods and flows; the report distinguishes current-source issues and false positives from unavailable company traces.
-2. [pending] Regression and remediation: public URL generation, consumer scan/cleanup, and repository public APIs are the test boundaries already requested in the supplied mission. Use focused red/green tests for changed behavior; real PostgreSQL for database semantics. Do not rewrite safe constant SQL merely for a scanner.
-3. [pending] Verification: focused tests, full Java/Go and applicable E2E/SQL tests, pinned public Semgrep before/after, CodeQL and actual artifact Critical scan. Preserve raw evidence outside Git and record exact results.
+2. [complete] Regression and remediation: URL, independent scan directories and duplicate names reproduced failures before fixes; focused native checks passed. Added actual PostgreSQL tests for the already-bound SQL groups and secure-stream Linux cleanup.
+3. [in_progress] Verification: full Java/Go and applicable E2E/SQL tests, pinned public Semgrep before/after, CodeQL and actual artifact Critical scan. Preserve raw evidence outside Git and record exact results.
 4. [pending] Delivery: review scoped diff; commit/push feature branch, integrate dev after checks, verify exact dev SHA, create/push unique annotated security-semgrep-2026-11-04 tag with explicit limits. Record final evidence without inventing original finding IDs or 31/31 closure.
 
 ## Constraints
@@ -18,3 +18,5 @@ Investigate the user's reported 12 remaining sites on skillhub-security/dev only
 - Optional root CLAUDE.md is absent; applicable target AGENTS and Trellis conventions are being used.
 - A baseline JSON read used Windows' cp950 default and failed; all subsequent JSON reads explicitly use UTF-8.
 - Docker Desktop Linux engine pipe is unavailable locally. Do not reset Docker or user data; run real PostgreSQL/Linux regressions on the existing GitHub-hosted CI.
+- First E2E run 42473763199 stopped before product tests: ubuntu-latest supplied Ubuntu 26.04, unsupported by pinned Playwright 1.58.2. Pin only the E2E runner to supported Ubuntu 24.04; rerun current source without upgrading application dependencies.
+- Optional javap bytecode inspection is unavailable in the bundled JBR (no executable or jdk.jdeps module). Source constant-expression review and actual PostgreSQL API regressions remain the evidence; no bytecode claim is made.
