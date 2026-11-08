@@ -3,12 +3,14 @@ package com.iflytek.skillhub.service;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** Public links use deployment configuration only, never request forwarding headers. */
 @Component
 public final class SkillWebUrls {
+    private static final Pattern NON_ASCII = Pattern.compile("[^\\x00-\\x7f]+");
     private final String base;
 
     public SkillWebUrls(@Value("${skillhub.public.base-url:}") String configuredBase) {
@@ -23,13 +25,17 @@ public final class SkillWebUrls {
     private static String trustedBase(String value) {
         if (value == null || value.isBlank()) return null;
         String trimmed = value.trim();
+        if (!StandardCharsets.UTF_8.newEncoder().canEncode(trimmed)) return null;
         try {
             URI uri = URI.create(trimmed);
             if (!("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()))
                     || uri.getHost() == null || uri.getRawUserInfo() != null
                     || uri.getRawQuery() != null || uri.getRawFragment() != null
                     || uri.getPort() > 65535) return null;
-            return uri.toASCIIString().replaceAll("/+$", "");
+            // URI.toASCIIString() applies NFC, which can change a deployment's path identity.
+            return NON_ASCII.matcher(uri.toString())
+                    .replaceAll(match -> URLEncoder.encode(match.group(), StandardCharsets.UTF_8))
+                    .replaceAll("/+$", "");
         } catch (IllegalArgumentException invalid) {
             return null;
         }

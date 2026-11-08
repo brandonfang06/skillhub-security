@@ -18,9 +18,14 @@ import org.redisson.api.RedissonClient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.DirectoryStream;
+import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SecureDirectoryStream;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.time.Clock;
 import java.time.DateTimeException;
 import java.time.Duration;
@@ -352,6 +357,14 @@ public class ScanTaskConsumer extends AbstractStreamConsumer<ScanTaskConsumer.Sc
                 log.warn("Skipping cleanup for unsafe scan temp path");
                 return;
             }
+            // Anchor every component to an open handle so parent replacement cannot redirect deletion.
+            try (DirectoryStream<Path> root = Files.newDirectoryStream(path.getRoot())) {
+                if (root instanceof SecureDirectoryStream<Path> secureRoot) {
+                    deleteRelative(secureRoot, path.getRoot().relativize(path));
+                    return;
+                }
+            }
+            // Providers without secure streams still require an exclusively service-owned workspace.
             if (Files.isDirectory(path)) {
                 try (var walk = Files.walk(path)) {
                     walk.sorted(Comparator.reverseOrder()).forEach(p -> {
@@ -364,9 +377,32 @@ public class ScanTaskConsumer extends AbstractStreamConsumer<ScanTaskConsumer.Sc
             } else if (Files.exists(path)) {
                 Files.delete(path);
             }
+        } catch (NoSuchFileException ignored) {
         } catch (Exception e) {
             log.warn("Failed to cleanup temp path: {}, errorType={}",
                     skillPath, e.getClass().getSimpleName());
+        }
+    }
+
+    private void deleteRelative(SecureDirectoryStream<Path> directory, Path relative) throws IOException {
+        Path name = relative.getName(0);
+        if (relative.getNameCount() > 1) {
+            try (var child = directory.newDirectoryStream(name, LinkOption.NOFOLLOW_LINKS)) {
+                deleteRelative(child, relative.subpath(1, relative.getNameCount()));
+            }
+            return;
+        }
+        var attributes = directory.getFileAttributeView(name, BasicFileAttributeView.class,
+                LinkOption.NOFOLLOW_LINKS).readAttributes();
+        if (attributes.isDirectory()) {
+            try (var child = directory.newDirectoryStream(name, LinkOption.NOFOLLOW_LINKS)) {
+                for (Path entry : child) {
+                    deleteRelative(child, entry.getFileName());
+                }
+            }
+            directory.deleteDirectory(name);
+        } else {
+            directory.deleteFile(name);
         }
     }
 

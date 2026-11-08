@@ -252,6 +252,32 @@ class SecurityScanServiceTest {
     }
 
     @Test
+    void triggerScan_keepsSeparateAttemptsForTheSameVersionInIndependentDirectories() throws Exception {
+        long versionId = java.util.concurrent.ThreadLocalRandom.current().nextLong(1_000_000, Long.MAX_VALUE);
+        SkillVersion version = new SkillVersion(8L, "1.0.0", "publisher-1");
+        setId(version, versionId);
+        given(skillVersionRepository.findById(versionId)).willReturn(Optional.of(version));
+        ArgumentCaptor<ScanTask> tasks = ArgumentCaptor.forClass(ScanTask.class);
+        try {
+            service.triggerScan(versionId, List.of(new PackageEntry(
+                    "README.md", "first".getBytes(), 5L, "text/plain")), "publisher-1");
+            service.triggerScan(versionId, List.of(new PackageEntry(
+                    "README.md", "second".getBytes(), 6L, "text/plain")), "publisher-1");
+            verify(scanTaskProducer, org.mockito.Mockito.times(2)).publishScanTask(tasks.capture());
+            Path first = Path.of(tasks.getAllValues().get(0).skillPath());
+            Path second = Path.of(tasks.getAllValues().get(1).skillPath());
+            assertThat(first).isNotEqualTo(second);
+            assertThat(Files.readString(first.resolve("README.md"))).isEqualTo("first");
+            assertThat(Files.readString(second.resolve("README.md"))).isEqualTo("second");
+        } finally {
+            for (String path : tasks.getAllValues().stream().map(ScanTask::skillPath).distinct().toList()) {
+                Files.deleteIfExists(Path.of(path).resolve("README.md"));
+                Files.deleteIfExists(Path.of(path));
+            }
+        }
+    }
+
+    @Test
     void triggerScan_rejectsDirectoryTraversalEntries() throws Exception {
         SkillVersion version = new SkillVersion(8L, "1.0.0", "publisher-1");
         setId(version, 42L);
@@ -267,6 +293,26 @@ class SecurityScanServiceTest {
         assertThatThrownBy(() -> service.triggerScan(42L, List.of(entry), "publisher-1"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unsafe scan path");
+    }
+
+    @ParameterizedTest
+    @CsvSource({"local", "upload"})
+    void triggerScan_rejectsDuplicatePortableEntryNamesBeforeReadingContent(String mode) throws Exception {
+        service = new SecurityScanService(auditRepository, skillVersionRepository,
+                scanTaskProducer, new ObjectMapper(), mode, true);
+        SkillVersion version = new SkillVersion(8L, "1.0.0", "publisher-1");
+        setId(version, 42L);
+        given(skillVersionRepository.findById(42L)).willReturn(Optional.of(version));
+        var first = PackageEntry.streaming("nested/document.txt", 1L, "text/plain", () -> {
+            throw new AssertionError("Duplicate package entries reached content reads");
+        });
+        var duplicate = new PackageEntry("nested\\document.txt", new byte[] {1}, 1L, "text/plain");
+
+        assertThatThrownBy(() -> service.triggerScan(42L, List.of(first, duplicate), "publisher-1"))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("Duplicate scan path");
+        verify(auditRepository, never()).save(any());
+        verify(scanTaskProducer, never()).publishScanTask(any());
+        verify(skillVersionRepository, never()).save(any());
     }
 
     @ParameterizedTest
@@ -297,13 +343,14 @@ class SecurityScanServiceTest {
     }
 
     @Test
-    void triggerScan_rejectsSymbolicLinkParentBeforeWritingOutsideWorkspace() throws Exception {
+    void triggerScan_doesNotReuseAPreexistingVersionDirectoryContainingASymlink() throws Exception {
         Path root = Path.of("/tmp/skillhub-scans").toAbsolutePath().normalize();
         Files.createDirectories(root);
         long versionId = java.util.concurrent.ThreadLocalRandom.current().nextLong(1_000_000, Long.MAX_VALUE);
         Path owned = Files.createDirectory(root.resolve(Long.toString(versionId)));
         Path outside = Files.createTempDirectory("scan-write-outside-");
         Path link = owned.resolve("alias");
+        Path staged = null;
         try {
             try {
                 Files.createSymbolicLink(link, outside);
@@ -315,12 +362,19 @@ class SecurityScanServiceTest {
             given(skillVersionRepository.findById(versionId)).willReturn(Optional.of(version));
             var entry = new PackageEntry("alias/escape.txt", new byte[] {1}, 1L, "text/plain");
 
-            assertThatThrownBy(() -> service.triggerScan(versionId, List.of(entry), "publisher-1"))
-                    .isInstanceOf(IllegalStateException.class).hasMessageContaining("Unsafe scan path");
+            service.triggerScan(versionId, List.of(entry), "publisher-1");
+            var task = ArgumentCaptor.forClass(ScanTask.class);
+            verify(scanTaskProducer).publishScanTask(task.capture());
+            staged = Path.of(task.getValue().skillPath());
+            assertThat(staged).isNotEqualTo(owned);
+            assertThat(staged.resolve("alias/escape.txt")).hasBinaryContent(new byte[] {1});
             assertThat(outside.resolve("escape.txt")).doesNotExist();
-            verify(auditRepository, never()).save(any());
-            verify(scanTaskProducer, never()).publishScanTask(any());
         } finally {
+            if (staged != null) {
+                Files.deleteIfExists(staged.resolve("alias/escape.txt"));
+                Files.deleteIfExists(staged.resolve("alias"));
+                Files.deleteIfExists(staged);
+            }
             Files.deleteIfExists(link);
             Files.delete(owned);
             Files.deleteIfExists(outside.resolve("escape.txt"));

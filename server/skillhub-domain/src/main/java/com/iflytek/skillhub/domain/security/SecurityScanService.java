@@ -24,6 +24,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -231,9 +232,10 @@ public class SecurityScanService {
 
     private Path saveTempDirectory(Long versionId, List<PackageEntry> entries) {
         try {
-            Path skillDir = TEMP_BASE_DIR.resolve(String.valueOf(versionId)).normalize();
-            rejectSymbolicLinks(skillDir);
-            Files.createDirectories(skillDir);
+            rejectSymbolicLinks(TEMP_BASE_DIR);
+            Files.createDirectories(TEMP_BASE_DIR);
+            // Independent attempts must not overwrite or clean up one another's files.
+            Path skillDir = Files.createTempDirectory(TEMP_BASE_DIR, versionId + "-");
             for (PackageEntry entry : entries) {
                 Path filePath = resolveSafeChild(skillDir, entry.path());
                 Path parent = filePath.getParent();
@@ -251,8 +253,11 @@ public class SecurityScanService {
     }
 
     private void validateUploadEntries(List<PackageEntry> entries) {
+        var paths = new HashSet<String>();
         for (PackageEntry entry : entries) {
-            safeZipEntryName(entry.path());
+            if (!paths.add(safeZipEntryName(entry.path()))) {
+                throw new IllegalStateException("Duplicate scan path: " + entry.path());
+            }
         }
     }
 

@@ -20,6 +20,40 @@ import org.redisson.api.RedissonClient;
 
 class ScanTaskConsumerPathSafetyTest {
 
+    @Test
+    void completionRemovesOnlyItsNestedTreeAndNeverFollowsDescendantLinks() throws Exception {
+        Path root = Path.of("/tmp/skillhub-scans").toAbsolutePath().normalize();
+        Files.createDirectories(root);
+        Path owned = Files.createTempDirectory(root, "scan-completion-");
+        Path outside = Files.createTempDirectory("scan-completion-outside-");
+        Path sentinel = Files.writeString(outside.resolve("keep.txt"), "keep");
+        Path sibling = Files.createTempFile(root, "scan-other-task-", ".zip");
+        Path nested = Files.createDirectories(owned.resolve("nested/deeper"));
+        Path document = Files.writeString(nested.resolve("SKILL.md"), "valid nested package");
+        Path link = owned.resolve("external");
+        try {
+            try {
+                Files.createSymbolicLink(link, outside);
+            } catch (UnsupportedOperationException | java.nio.file.FileSystemException exception) {
+                org.junit.jupiter.api.Assumptions.abort("Symbolic links unavailable: " + exception.getClass().getSimpleName());
+            }
+            consumer().markCompleted(new ScanTaskConsumer.ScanTaskPayload(
+                    "task-completion", 42L, owned.toString(), null, ScannerType.SKILL_SCANNER));
+            assertThat(owned).doesNotExist();
+            assertThat(Files.readString(sentinel)).isEqualTo("keep");
+            assertThat(sibling).exists();
+        } finally {
+            Files.deleteIfExists(link);
+            Files.deleteIfExists(document);
+            Files.deleteIfExists(nested);
+            Files.deleteIfExists(owned.resolve("nested"));
+            Files.deleteIfExists(owned);
+            Files.deleteIfExists(sentinel);
+            Files.deleteIfExists(outside);
+            Files.deleteIfExists(sibling);
+        }
+    }
+
     private ScanTaskConsumer consumer() {
         return new ScanTaskConsumer(
                 org.mockito.Mockito.mock(RedissonClient.class), "scan-stream", "scan-group",
